@@ -32,8 +32,9 @@ def create_gpu_label() -> QLabel:
         """
     )
     gpu_label.setToolTip(
-        "Indicates whether PyTorch has access to a GPU. If your machine has GPU and "
-        "this label indicates CPU, please check your PyTorch installation."
+        "Indicates whether PyTorch has access to a GPU.\n"
+        "If your machine has GPU and this label indicates\n"
+        "CPU, please check your PyTorch installation."
     )
 
     return gpu_label

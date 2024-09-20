@@ -21,6 +21,7 @@ from qtpy.QtWidgets import (
 from careamics_napari.widgets import (
     CAREamicsBanner,
     create_gpu_label,
+    create_algorithm_choice,
     ScrollWidgetWrapper,
 )
 
@@ -58,6 +59,9 @@ class TrainWidget(QWidget):
         gpu_button = create_gpu_label()
         gpu_button.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.layout().addWidget(gpu_button)
+
+        # add algorithm selection
+        self.layout().addWidget(create_algorithm_choice())
 
 
 
