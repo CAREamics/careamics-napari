@@ -20,11 +20,7 @@ def create_gpu_label() -> QLabel:
         color = "FFDBA4" # yellow
 
     gpu_label = QLabel(text)
-    font_color = gpu_label.palette().color(gpu_label.foregroundRole())
-
-    gpu_label.setStyleSheet(
-         f"font-weight: bold; color: #{color};"
-    )
+    font_color = gpu_label.palette().color(gpu_label.foregroundRole()).name()[1:]
     gpu_label.setStyleSheet(
         f"""
             QLabel {{
