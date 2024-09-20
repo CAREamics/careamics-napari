@@ -66,26 +66,37 @@ class TrainWidget(QWidget):
             )
         )
 
-        # add GPU label
+        # add GPU label and algorithm selection
+        algo_panel = QWidget()
+        algo_panel.setLayout(QHBoxLayout())
+        
         gpu_button = create_gpu_label()
         gpu_button.setAlignment(Qt.AlignmentFlag.AlignRight)
-        self.layout().addWidget(gpu_button)
+        gpu_button.setContentsMargins(0, 5, 0, 0) # top margin
 
-        # add algorithm selection
-        self.layout().addWidget(
-            AlgorithmChoiceWidget(signal=self.algorithm_signal)
-        )
+        algo_choice = AlgorithmChoiceWidget(signal=self.algorithm_signal)
+        gpu_button.setAlignment(Qt.AlignmentFlag.AlignLeft)
+
+        algo_panel.layout().addWidget(algo_choice)
+        algo_panel.layout().addWidget(gpu_button)
+
+        self.layout().addWidget(algo_panel)
 
         # add data tabs
         self.data_stck = QStackedWidget()
-        self.data_stck.addWidget(DataSelectionWidget())
-        self.data_stck.addWidget(DataSelectionWidget(True))
+        self.data_layers = [
+            DataSelectionWidget(),
+            DataSelectionWidget(True),
+        ]
+        for layer in self.data_layers:
+            self.data_stck.addWidget(layer)
         self.data_stck.setCurrentIndex(0)
 
         self.layout().addWidget(self.data_stck)
 
         # connect signals
-        self.algorithm_signal.events.name.connect(self.set_data)
+        if self.algorithm_signal is not None:
+            self.algorithm_signal.events.name.connect(self.set_data)
 
     def set_data(self, name: str) -> None:
         """Set the data selection widget based on the algorithm."""

@@ -49,16 +49,28 @@ class DataSelectionWidget(QTabWidget):
         self.use_target = use_target
             
         # QTabs
-        tab_layers = QWidget()
-        tab_layers.setLayout(QVBoxLayout())
-        tab_disk = QWidget()
-        tab_disk.setLayout(QVBoxLayout())
+        layer_tab = QWidget()
+        layer_tab.setLayout(QVBoxLayout())
+        disk_tab = QWidget()
+        disk_tab.setLayout(QVBoxLayout())
 
         # add tabs
-        self.addTab(tab_layers, 'From layers')
-        self.addTab(tab_disk, 'From disk')
+        self.addTab(layer_tab, 'From layers')
+        self.addTab(disk_tab, 'From disk')
         self.setTabToolTip(0, 'Use images from napari layers')
         self.setTabToolTip(1, 'Use patches saved on the disk')
+
+        # set tabs
+        self._set_layer_tab(layer_tab, napari_viewer)
+        self._set_disk_tab(disk_tab)
+
+
+
+    def _set_layer_tab(
+            self, 
+            layer_tab: QWidget, 
+            napari_viewer: Optional[napari.Viewer]
+    ) -> None:
 
         if self.use_target:
             self.setMaximumHeight(400)
@@ -104,13 +116,16 @@ class DataSelectionWidget(QTabWidget):
                 )
 
             
-            tab_layers.layout().addWidget(layer_choice.native)
+            layer_tab.layout().addWidget(layer_choice.native)
         else:
             self.removeTab(0)
 
+    def _set_disk_tab(self, disk_tab: QWidget) -> None:
         # disk tab
         buttons = QWidget()
         form = QFormLayout()
+        form.setContentsMargins(4, 0, 4, 0)
+        form.setSpacing(0)
 
         train_images_folder = FolderWidget('Choose')
         val_images_folder = FolderWidget('Choose')
@@ -153,7 +168,7 @@ class DataSelectionWidget(QTabWidget):
             )
 
         buttons.setLayout(form)
-        tab_disk.layout().addWidget(buttons)
+        disk_tab.layout().addWidget(buttons)
 
 
 if __name__ == "__main__":

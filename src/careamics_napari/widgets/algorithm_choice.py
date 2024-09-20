@@ -13,32 +13,19 @@ from careamics_napari.careamics_utils import get_available_algorithms, get_algor
 from careamics_napari.widgets.signals import AlgorithmSignal
 
 
-class AlgorithmChoiceWidget(QWidget):
+class AlgorithmChoiceWidget(QComboBox):
 
     def __init__(self, signal: Optional[AlgorithmSignal] = None):
         super().__init__()
 
         self.signal = signal
 
-        # Create layout
-        layout = QHBoxLayout()
-
-        # Create a label to show the selected item
-        label = QLabel("Algorithm")
-        layout.addWidget(label)
-
-        # Create a QComboBox (dropdown list)
-        self.combo_box = QComboBox()
-        self.combo_box.addItems(get_available_algorithms())
-        self.combo_box.setToolTip("Select an algorithm.")
-
-        layout.addWidget(self.combo_box)
+        self.addItems(get_available_algorithms())
+        self.setToolTip("Select an algorithm.")
         
         # Connect the signal
-        self.combo_box.currentIndexChanged.connect(self.algorithm_changed)
+        self.currentIndexChanged.connect(self.algorithm_changed)
         self.current_algorithm = self._get_current_algorithm()
-
-        self.setLayout(layout)
 
     def _get_current_algorithm(self) -> str:
         """Return the current algorithm name.
@@ -48,7 +35,7 @@ class AlgorithmChoiceWidget(QWidget):
         str
             Current algorithm name.
         """
-        return get_algorithm(self.combo_box.currentText())
+        return get_algorithm(self.currentText())
 
     def algorithm_changed(self, index: int) -> None:
         """Emit the algorithm signal.
@@ -70,7 +57,7 @@ if __name__ == "__main__":
     from qtpy.QtWidgets import QApplication
     import sys
 
-    myalgo = AlgorithmSignal("")
+    myalgo = AlgorithmSignal()
 
     @myalgo.events.name.connect
     def print_algorithm(name: str):

@@ -115,7 +115,7 @@ def load_button(Model: Path):
 
 
 @magic_factory(
-    auto_call=True, use3d={"label": " ", "widget_type": "Checkbox", "visible": True}
+    auto_call=True, use_3d={"label": " ", "widget_type": "Checkbox", "visible": True}
 )
 def enable_3d(use_3d: bool = False) -> bool:
     """A checkbox to enable 3D mode.

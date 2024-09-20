@@ -82,7 +82,7 @@ class CAREamicsBanner(QWidget):
 
         super().__init__()
         
-        self.setMinimumSize(400, 200)
+        self.setMinimumSize(250, 200)
 
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
@@ -138,6 +138,7 @@ class CAREamicsBanner(QWidget):
         # add widgets
         layout.addWidget(img_widget)
         layout.addWidget(right_widget)
+        layout.setContentsMargins(0, 0, 0, 0)
 
 
 if __name__ == "__main__":

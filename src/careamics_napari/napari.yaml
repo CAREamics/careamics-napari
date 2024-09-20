@@ -1,45 +1,10 @@
-name: napari-n2v
-display_name: napari n2v
+name: careamics-napari
+display_name: CAREamics
 contributions:
   commands:
-    - id: napari-n2v.make_n2v_trainwidget
-      python_name: napari_n2v._train_widget:TrainingWidgetWrapper
-      title: Make N2V widget
-    - id: napari-n2v.make_n2v_predictwidget
-      python_name: napari_n2v._predict_widget:PredictWidgetWrapper
-      title: Make N2V predict widget
-    - id: napari-n2v.make_n2v_demo_prediction
-      python_name: napari_n2v._predict_widget:DemoPrediction
-      title: Make N2V demo prediction
-    - id: napari-n2v.data_2D
-      python_name: napari_n2v._sample_data:n2v_2D_data
-      title: N2V 2D data
-    - id: napari-n2v.data_3D
-      python_name: napari_n2v._sample_data:n2v_3D_data
-      title: N2V 3D data
-    - id: napari-n2v.data_RGB
-      python_name: napari_n2v._sample_data:n2v_rgb_data
-      title: N2V RGB data
-    - id: napari-n2v.data_SEM
-      python_name: napari_n2v._sample_data:n2v_sem_data
-      title: N2V SEM data
+    - id: careamics-napari.make_train_widget
+      python_name: careamics_napari.training_widget:TrainingWidgetWrapper
+      title: Train CAREamics
   widgets:
-    - command: napari-n2v.make_n2v_trainwidget
-      display_name: N2V Train
-    - command: napari-n2v.make_n2v_predictwidget
-      display_name: N2V Predict
-    - command: napari-n2v.make_n2v_demo_prediction
-      display_name: N2V Demo prediction
-  sample_data:
-    - command: napari-n2v.data_2D
-      display_name: Download data (2D)
-      key: napari_n2v_2D_data
-    - command: napari-n2v.data_3D
-      display_name: Download data (3D)
-      key: napari_n2v_3D_data
-    - command: napari-n2v.data_RGB
-      display_name: Download data (RGB)
-      key: napari_n2v_RGB_data
-    - command: napari-n2v.data_SEM
-      display_name: Download data (SEM)
-      key: napari_n2v_SEM_data
+    - command: careamics-napari.make_train_widget
+      display_name: Train CAREamics
