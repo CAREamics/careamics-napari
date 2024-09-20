@@ -50,21 +50,56 @@ def layer_choice(annotation: Optional[Any], **kwargs: Any) -> Widget:
     return widget
 
 
-def two_layers_choice() -> Container:
-    """Create a widget to select two layers from the napari viewer.
+def two_layers_choice(names: list[str] = ["Train", "Val"]) -> Container:
+    """Create a widget selecting two layers from the napari viewer.
+
+    Parameters
+    ----------
+    names : list of str, default=["Train", "Val"]
+        The names of the layers to select.
 
     Returns
     -------
     Container
-        The widget to select two layers from the napari viewer.
+        The widget selecting two layers from the napari viewer.
+
+    Raises
+    ------
+    ImportError
+        If napari is not installed.
+    ValueError
+        If the names list does not contain two strings only.
+    ValueError
+        If the names are the same.
     """
     if not _has_napari:
         raise ImportError("napari is not installed.")
     
-    img = layer_choice(annotation=Image, name="Train")
-    lbl = layer_choice(annotation=Image, name="Val")
+    if len(names) != 2:
+        raise ValueError("The names list must contain two strings only.")
+    
+    if names[0] == names[1]:
+        raise ValueError("The names must be different.")
+    
+    img = layer_choice(annotation=Image, name=names[0])
+    lbl = layer_choice(annotation=Image, name=names[1])
 
     return Container(widgets=[img, lbl])
+
+
+def four_layers_choice() -> Container:
+    """Create a widget to selecting four layers from the napari viewer.
+
+    Returns
+    -------
+    Container
+        The widget selecting four layers from the napari viewer.
+    """
+    # TODO can the text "TrainTarget" be made more friendly?
+    img = two_layers_choice(annotation=Image, name=["Train", "TrainTarget"]) 
+    lbl = two_layers_choice(annotation=Image, name=["Val", "ValTarget"])
+
+    return img.extend(lbl)
 
 
 @magic_factory(auto_call=True, Model={"mode": "r", "filter": "*.ckpt *.zip"})
