@@ -94,7 +94,7 @@ class CAREamicsBanner(QWidget):
         icon = QPixmap(ICON_CAREAMICS)
         img_widget = QLabel()
         img_widget.setPixmap(icon)
-        img_widget.setFixedSize(128, 128)
+        img_widget.setFixedSize(94, 128)
 
         # right panel
         right_layout = QVBoxLayout()
@@ -144,17 +144,17 @@ if __name__ == "__main__":
     from qtpy.QtWidgets import QApplication
     import sys
 
-    # Step 2: Create a QApplication instance
+    # Create a QApplication instance
     app = QApplication(sys.argv)
 
-    # Step 4: Instantiate your widget
+    # Instantiate widget
     widget = CAREamicsBanner(
         "Test",
         "A test description for this widget."
     )
 
-    # Step 5: Show the widget
+    # Show the widget
     widget.show()
 
-    # Step 6: Run the application event loop
+    # Run the application event loop
     sys.exit(app.exec_())

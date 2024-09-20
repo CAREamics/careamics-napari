@@ -44,14 +44,14 @@ if __name__ == "__main__":
     from qtpy.QtWidgets import QApplication
     import sys
 
-    # Step 2: Create a QApplication instance
+    # Create a QApplication instance
     app = QApplication(sys.argv)
 
-    # Step 4: Instantiate your widget
+    # Instantiate widget
     widget = create_gpu_label()
 
-    # Step 5: Show the widget
+    # Show the widget
     widget.show()
 
-    # Step 6: Run the application event loop
+    # Run the application event loop
     sys.exit(app.exec_())
