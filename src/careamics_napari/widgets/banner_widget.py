@@ -13,8 +13,8 @@ from careamics_napari.resources import ICON_GITHUB, ICON_CAREAMICS
 DOC_LINK = 'https://careamics.github.io',
 """Link to the CAREamics documentation."""
 
-GH_LINK = 'https://github.com/CAREamics/careamics'
-"""Link to the CAREamics Github repository."""
+GH_LINK = 'https://github.com/CAREamics/careamics-napari/issues'
+"""Link to the CAREamics UI Github repository issues."""
 
 
 def _create_link(link: str, text: str) -> QLabel:
@@ -36,6 +36,7 @@ def _create_link(link: str, text: str) -> QLabel:
     label.setContentsMargins(0, 5, 0, 5)
 
     label.setText(f"<a href='{link}' style='color:white'>{text}</a>")
+    label.setToolTip("Visit the documentation for how to use this plugin.")
 
     font = QFont()
     font.setPointSize(11)
@@ -87,6 +88,8 @@ class CAREamicsBanner(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(layout)
 
+        bg_color = self.palette().color(QtGui.QPalette.ColorRole.Background).name()
+
         # logo
         icon = QPixmap(ICON_CAREAMICS)
         img_widget = QLabel()
@@ -107,6 +110,10 @@ class CAREamicsBanner(QWidget):
         description_widget.setReadOnly(True)
         description_widget.setPlainText(short_desc)
         description_widget.setFixedSize(200, 50)
+        description_widget.setStyleSheet(
+            f"background-color: {bg_color};"
+            f"border: 2px solid {bg_color};"
+        )
 
         # bottom widget
         bottom_widget = QWidget()

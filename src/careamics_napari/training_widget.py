@@ -20,6 +20,7 @@ from qtpy.QtWidgets import (
 
 from careamics_napari.widgets import (
     CAREamicsBanner,
+    create_gpu_label,
     ScrollWidgetWrapper,
 )
 
@@ -52,6 +53,11 @@ class TrainWidget(QWidget):
                 short_desc="CAREamics UI for training a denoising model.",
             )
         )
+
+        # add GPU label
+        gpu_button = create_gpu_label()
+        gpu_button.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.layout().addWidget(gpu_button)
 
 
 
