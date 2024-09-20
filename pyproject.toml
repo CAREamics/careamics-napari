@@ -1,0 +1,162 @@
+# https://peps.python.org/pep-0621/
+[project]
+name = "careamics-napari"
+dynamic = ["version"]
+description = "napari plugin providing an interface to CAREamics."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "BSD-3-Clause" }
+authors = [{ name = 'Joran Deschamps', email = 'joran.deschamps@fht.org' }]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: BSD License",
+    "Typing :: Typed",
+]
+dependencies = ['qtpy', 'psygnal', 'pyqtgraph', 'napari', 'careamics']
+
+[project.optional-dependencies]
+# development dependencies and tooling
+dev = [
+    "pytest",     # https://docs.pytest.org/en/latest/contents.html
+    "pytest-cov", # https://pytest-cov.readthedocs.io/en/latest/
+    "pytest-qt",  # https://pytest-qt.readthedocs.io/en/latest/
+    "pyqt5",
+]
+
+[project.entry-points."napari.manifest"]
+careamics-napari = "careamics_napari:napari.yaml"
+
+[build-system]
+requires = ["setuptools>=42.0.0", "wheel", "setuptools_scm"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"*" = ["*.yaml"]
+
+[tool.setuptools_scm]
+write_to = "src/careamics_napari/_version.py"
+
+[project.urls]
+"Bug Tracker" = "https://github.com/CAREamics/careamics-napari/issues"
+homepage = "https://careamics.github.io/"
+repository = "https://github.com/CAREamics/careamics-napari"
+
+# https://beta.ruff.rs/docs
+[tool.ruff]
+line-length = 88
+target-version = "py39"
+src = ["src"]
+lint.select = [
+    "E",  # style errors
+    "W",  # style warnings
+    "F",  # flakes
+    "D",  # pydocstyle
+    "I",  # isort
+    "UP", # pyupgrade
+    # "S",    # bandit
+    "C4",   # flake8-comprehensions
+    "B",    # flake8-bugbear
+    "A001", # flake8-builtins
+    "RUF",  # ruff-specific rules
+]
+lint.ignore = [
+    "D100", # Missing docstring in public module
+    "D107", # Missing docstring in __init__
+    "D203", # 1 blank line required before class docstring
+    "D212", # Multi-line docstring summary should start at the first line
+    "D213", # Multi-line docstring summary should start at the second line
+    "D401", # First line should be in imperative mood
+    "D413", # Missing blank line after last section
+    "D416", # Section name should end with a colon
+
+    # incompatibility with mypy
+    "RUF005", # collection-literal-concatenation, in prediction_utils.py:30
+
+    # version specific
+    "UP007", # Replace Union by |, mandatory for py3.9
+]
+show-fixes = true
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*.py" = ["D", "S"]
+"setup.py" = ["D"]
+
+[tool.black]
+line-length = 88
+
+# https://mypy.readthedocs.io/en/stable/config_file.html
+[tool.mypy]
+files = "src/**/"
+strict = false
+# allow_untyped_defs = false
+# allow_untyped_calls = false
+# disallow_any_generics = false
+# ignore_missing_imports = false
+
+
+# https://docs.pytest.org/en/6.2.x/customize.html
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = ["src/careamics", "tests"] # add src/careamics for doctest discovery
+filterwarnings = [
+    # "error",
+    # "ignore::UserWarning",
+]
+addopts = "-p no:doctest"
+
+markers = ["qt: marks tests as requiring qt"]
+
+# https://coverage.readthedocs.io/en/6.4/config.html
+[tool.coverage.report]
+exclude_lines = [
+    "if TYPE_CHECKING:",
+    "@overload",
+    "except ImportError",
+    "raise NotImplementedError()",
+    "except PackageNotFoundError:",
+]
+
+[tool.coverage.run]
+source = ["src/careamics-napari"]
+
+# https://github.com/mgedmin/check-manifest#configuration
+# add files that you want check-manifest to explicitly ignore here
+# (files that are in the repo but shouldn't go in the package)
+[tool.check-manifest]
+ignore = [
+    ".github_changelog_generator",
+    ".pre-commit-config.yaml",
+    ".ruff_cache/**/*",
+    "setup.py",
+    "tests/**/*",
+]
+
+[tool.numpydoc_validation]
+checks = [
+    "all",  # report on all checks, except the below
+    "EX01", # Example section not found
+    "SA01", # See Also section not found
+    "ES01", # Extended Summar not found
+    "GL01", # Docstring text (summary) should start in the line immediately
+    # after the opening quotes
+    "GL02", # Closing quotes should be placed in the line after the last text
+    # in the docstring
+    "GL03", # Double line break found
+]
+exclude = [ # don't report on objects that match any of these regex
+    "test_*",
+]
