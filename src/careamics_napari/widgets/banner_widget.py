@@ -1,22 +1,40 @@
-import webbrowser
+"""A banner widget with CAREamics logo, and links to Github and documentation."""
 
-from qtpy import QtCore
+import webbrowser
+from typing import Any
+from typing_extensions import Self
+
+from qtpy import QtCore, QtGui
 from qtpy.QtGui import QCursor, QFont, QPixmap
 from qtpy.QtWidgets import QHBoxLayout, QLabel, QPlainTextEdit, QVBoxLayout, QWidget
 
-from careamics_napari.resources import ICON_GITHUB
+from careamics_napari.resources import ICON_GITHUB, ICON_CAREAMICS
+
+DOC_LINK = 'https://careamics.github.io',
+"""Link to the CAREamics documentation."""
+
+GH_LINK = 'https://github.com/CAREamics/careamics'
+"""Link to the CAREamics Github repository."""
 
 
 def _create_link(link: str, text: str) -> QLabel:
-    """
+    """Create link label.
 
-    :param link: the string this label should link to
-    :return: returns a QLabel object with a hyperlink
-    :rtype: object
+    Parameters
+    ----------
+    link : str
+        Link.
+    text : str
+        Text to display.
+
+    Returns
+    -------
+    QLabel
+        Link label.
     """
     label = QLabel()
     label.setContentsMargins(0, 5, 0, 5)
-    # TODO: is there a non-dark mode in napari?
+
     label.setText(f"<a href='{link}' style='color:white'>{text}</a>")
 
     font = QFont()
@@ -29,30 +47,48 @@ def _create_link(link: str, text: str) -> QLabel:
 
 
 def _open_link(link: str):
-    def link_opener(event):
+    """Open link in browser.
+
+    Parameters
+    ----------
+    link : str
+        Link to open.
+    """
+    def link_opener(event: Any):
         webbrowser.open(link)
 
     return link_opener
 
 
-class BannerWidget(QWidget):
+class CAREamicsBanner(QWidget):
+    """Banner widget with CAREamics logo, and links to Github and documentation.
+    """
 
     def __init__(
-        self,
+        self: Self,
         title: str,
-        img_path: str,
         short_desc: str,
-        wiki_link: str,
-        github_link: str,
-    ):
+    ) -> None:
+        """Constructor.
+
+        Parameters
+        ----------
+        title : str
+            Title of the banner.
+        short_desc : str
+            Short description of the banner.
+        """
+
         super().__init__()
+        
+        self.setMinimumSize(400, 200)
 
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(layout)
 
         # logo
-        icon = QPixmap(img_path)
+        icon = QPixmap(ICON_CAREAMICS)
         img_widget = QLabel()
         img_widget.setPixmap(icon)
         img_widget.setFixedSize(128, 128)
@@ -70,7 +106,7 @@ class BannerWidget(QWidget):
         description_widget = QPlainTextEdit()
         description_widget.setReadOnly(True)
         description_widget.setPlainText(short_desc)
-        description_widget.setFixedSize(256, 50)
+        description_widget.setFixedSize(200, 50)
 
         # bottom widget
         bottom_widget = QWidget()
@@ -80,12 +116,12 @@ class BannerWidget(QWidget):
         gh_icon = QPixmap(ICON_GITHUB)
         gh_widget = QLabel()
         gh_widget.setPixmap(gh_icon)
-        gh_widget.mousePressEvent = _open_link(github_link)
+        gh_widget.mousePressEvent = _open_link(GH_LINK)
         gh_widget.setCursor(QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
         gh_widget.setToolTip("Report issues")
 
         # add widgets
-        bottom_widget.layout().addWidget(_create_link(wiki_link, "Documentation"))
+        bottom_widget.layout().addWidget(_create_link(DOC_LINK, "Documentation"))
         bottom_widget.layout().addWidget(gh_widget)
 
         right_widget.layout().addWidget(title)
@@ -95,3 +131,23 @@ class BannerWidget(QWidget):
         # add widgets
         layout.addWidget(img_widget)
         layout.addWidget(right_widget)
+
+
+if __name__ == "__main__":
+    from qtpy.QtWidgets import QApplication
+    import sys
+
+    # Step 2: Create a QApplication instance
+    app = QApplication(sys.argv)
+
+    # Step 4: Instantiate your widget
+    widget = CAREamicsBanner(
+        "Test",
+        "A test description for this widget."
+    )
+
+    # Step 5: Show the widget
+    widget.show()
+
+    # Step 6: Run the application event loop
+    sys.exit(app.exec_())
