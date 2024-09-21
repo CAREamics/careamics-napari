@@ -67,7 +67,7 @@ class CAREamicsBanner(QWidget):
 
     def __init__(
         self: Self,
-        title: str,
+        title_label: str,
         short_desc: str,
     ) -> None:
         """Constructor.
@@ -85,10 +85,10 @@ class CAREamicsBanner(QWidget):
         self.setMinimumSize(250, 200)
 
         layout = QHBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
+        # layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(layout)
 
-        bg_color = self.palette().color(QtGui.QPalette.ColorRole.Background).name()
+        # bg_color = self.palette().color(QtGui.QPalette.ColorRole.Background).name()
 
         # logo
         icon = QPixmap(ICON_CAREAMICS)
@@ -102,18 +102,18 @@ class CAREamicsBanner(QWidget):
         right_widget.setLayout(right_layout)
 
         # title
-        title = QLabel(title)
-        title.setStyleSheet("font-weight: bold;")
+        title_label = QLabel(title_label)
+        title_label.setStyleSheet("font-weight: bold;")
 
         # description
         description_widget = QPlainTextEdit()
         description_widget.setReadOnly(True)
         description_widget.setPlainText(short_desc)
         description_widget.setFixedSize(200, 50)
-        description_widget.setStyleSheet(
-            f"background-color: {bg_color};"
-            f"border: 2px solid {bg_color};"
-        )
+        # description_widget.setStyleSheet(
+        #     f"background-color: {bg_color};"
+        #     f"border: 2px solid {bg_color};"
+        # )
 
         # bottom widget
         bottom_widget = QWidget()
@@ -131,14 +131,14 @@ class CAREamicsBanner(QWidget):
         bottom_widget.layout().addWidget(_create_link(DOC_LINK, "Documentation"))
         bottom_widget.layout().addWidget(gh_widget)
 
-        right_widget.layout().addWidget(title)
+        right_widget.layout().addWidget(title_label)
         right_widget.layout().addWidget(description_widget)
         right_widget.layout().addWidget(bottom_widget)
 
         # add widgets
         layout.addWidget(img_widget)
         layout.addWidget(right_widget)
-        layout.setContentsMargins(0, 0, 0, 0)
+        # layout.setContentsMargins(0, 0, 0, 0)
 
 
 if __name__ == "__main__":

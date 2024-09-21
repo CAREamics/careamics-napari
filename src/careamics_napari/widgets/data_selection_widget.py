@@ -124,8 +124,8 @@ class DataSelectionWidget(QTabWidget):
         # disk tab
         buttons = QWidget()
         form = QFormLayout()
-        form.setContentsMargins(4, 0, 4, 0)
-        form.setSpacing(0)
+        # form.setContentsMargins(4, 0, 4, 0)
+        # form.setSpacing(0)
 
         train_images_folder = FolderWidget('Choose')
         val_images_folder = FolderWidget('Choose')

@@ -61,7 +61,7 @@ class TrainWidget(QWidget):
         # add banner
         self.layout().addWidget(
             CAREamicsBanner(
-                title="CAREamics",
+                title_label="CAREamics",
                 short_desc="CAREamics UI for training a denoising model.",
             )
         )
@@ -93,6 +93,9 @@ class TrainWidget(QWidget):
         self.data_stck.setCurrentIndex(0)
 
         self.layout().addWidget(self.data_stck)
+
+
+    
 
         # connect signals
         if self.algorithm_signal is not None:
