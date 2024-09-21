@@ -1,3 +1,3 @@
 
 
-from .algorithm_signal import AlgorithmSignal
+from .algorithm_signal import ConfigurationSignal

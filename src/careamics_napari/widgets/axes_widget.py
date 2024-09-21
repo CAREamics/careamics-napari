@@ -1,10 +1,11 @@
 from enum import Enum
+from typing import Optional
 
 from qtpy import QtGui
 from qtpy.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QWidget
 
 from careamics_napari.utils import REF_AXES, are_axes_valid, filter_dimensions
-
+from careamics_napari.widgets.signals import ConfigurationSignal
 
 class Highlight(Enum):
     VALID = 0
@@ -26,12 +27,15 @@ class LettersValidator(QtGui.QValidator):
                 return QtGui.QValidator.Intermediate, value, pos
         return QtGui.QValidator.Invalid, value, pos
 
-
 class AxesWidget(QWidget):
-    """ """
+    """A widget allowing users to specify axes.
+    
+    Axes are validated based on the number of axes and whether 3D is enabled.
+    """
 
-    def __init__(self, n_axes=3, is_3D=False):
+    def __init__(self, signal: Optional[ConfigurationSignal] = None, n_axes=3, is_3D=False):
         super().__init__()
+        self.signal = signal
 
         # max axes is 6
         assert 0 < n_axes <= 6
@@ -67,13 +71,12 @@ class AxesWidget(QWidget):
         # validate text
         self._validate_text()
 
-    def get_default_text(self):
-        if self.is_3D:
-            defaults = ["YX", "ZYX", "SZYX", "STZYX", "STCZYX"]
-        else:
-            defaults = ["YX", "SYX", "STYX", "STCYX", "STC?YX"]
+        # set up signal handling when axes change
+        self.text_field.textChanged.connect(self._axes_changed)
 
-        return defaults[self.n_axes - 2]
+    def _axes_changed(self):
+        if self.signal is not None and self.is_text_valid:
+            self.signal.use_channels = "C" in self.get_axes()
 
     def _validate_text(self):
         axes = self.get_axes()
@@ -97,6 +100,14 @@ class AxesWidget(QWidget):
         else:  # VALID
             self.text_field.setStyleSheet("color: white;")
 
+    def get_default_text(self):
+        if self.is_3D:
+            defaults = ["YX", "ZYX", "SZYX", "STZYX", "STCZYX"]
+        else:
+            defaults = ["YX", "SYX", "STYX", "STCYX", "STC?YX"]
+
+        return defaults[self.n_axes - 2]
+
     def update_axes_number(self, n):
         self.n_axes = n
         self._validate_text()  # force new validation
@@ -117,14 +128,24 @@ class AxesWidget(QWidget):
 
 
 if __name__ == "__main__":
-    import napari
+    from qtpy.QtWidgets import QApplication
+    import sys
 
-    # It would be easier to create a QApplication and test the widget there, but I wanted to see it with napari style.
+    # Create a QApplication instance
+    app = QApplication(sys.argv)
 
-    # create a Viewer
-    viewer = napari.Viewer()
+    # Signals
+    myalgo = ConfigurationSignal()
 
-    # add our plugin
-    viewer.window.add_dock_widget(AxesWidget(4, False))
+    @myalgo.events.use_channels.connect
+    def print_axes():
+        print(f"Use channels: {myalgo.use_channels}")
 
-    napari.run()
+    # Instantiate widget
+    widget = AxesWidget(signal=myalgo)
+
+    # Show the widget
+    widget.show()
+
+    # Run the application event loop
+    sys.exit(app.exec_())

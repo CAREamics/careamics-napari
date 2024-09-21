@@ -46,6 +46,7 @@ def filter_dimensions(shape_length: int, is_3D: bool) -> list[str]:
         return all_permutations
 
 
+# TODO should use function from CAREamics?
 def are_axes_valid(axes: str) -> bool:
     """Check if axes are valid.
 

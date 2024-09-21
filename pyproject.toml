@@ -17,7 +17,13 @@ classifiers = [
     "License :: OSI Approved :: BSD License",
     "Typing :: Typed",
 ]
-dependencies = ['qtpy', 'psygnal', 'pyqtgraph', 'napari', 'careamics']
+dependencies = [
+    'qtpy',
+    'psygnal',
+    'pyqtgraph',
+    'napari',
+    'careamics[tensorboard]',
+]
 
 [project.optional-dependencies]
 # development dependencies and tooling

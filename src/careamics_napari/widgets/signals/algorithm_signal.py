@@ -6,14 +6,15 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from psygnal import SignalGroup, SignalInstance
 
-    class AlgorithmSignalGroup(SignalGroup):
-        name: SignalInstance
+    class ConfigurationSignalGroup(SignalGroup):
+        algorithm: SignalInstance
 
 
 @evented
 @dataclass
-class AlgorithmSignal:
+class ConfigurationSignal:
     if TYPE_CHECKING:
-        events: AlgorithmSignalGroup
+        events: ConfigurationSignalGroup
 
-    name: str = ""
+    algorithm: str = ""
+    use_channels: bool = False

@@ -28,7 +28,7 @@ from careamics_napari.widgets import (
     DataSelectionWidget,
     ScrollWidgetWrapper,
 )
-from careamics_napari.widgets.signals import AlgorithmSignal
+from careamics_napari.widgets.signals import ConfigurationSignal
 
 class State(Enum):
     IDLE = 0
@@ -42,7 +42,7 @@ class TrainingWidgetWrapper(ScrollWidgetWrapper):
 class TrainWidget(QWidget):
     def __init__(
             self: Self,
-            algorithm_signal: Optional[AlgorithmSignal] = None
+            algorithm_signal: Optional[ConfigurationSignal] = None
     ) -> None:
         super().__init__()
 
@@ -62,7 +62,9 @@ class TrainWidget(QWidget):
         self.layout().addWidget(
             CAREamicsBanner(
                 title_label="CAREamics",
-                short_desc="CAREamics UI for training a denoising model.",
+                short_desc=(
+                    "CAREamics UI for training denoising model."
+                )
             )
         )
 
@@ -95,13 +97,12 @@ class TrainWidget(QWidget):
         self.layout().addWidget(self.data_stck)
 
 
-    
 
         # connect signals
         if self.algorithm_signal is not None:
-            self.algorithm_signal.events.name.connect(self.set_data)
+            self.algorithm_signal.events.algorithm.connect(self.set_data_from_algorithm)
 
-    def set_data(self, name: str) -> None:
+    def set_data_from_algorithm(self, name: str) -> None:
         """Set the data selection widget based on the algorithm."""
         print(name)
         if (
@@ -122,7 +123,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     # Signals
-    myalgo = AlgorithmSignal()
+    myalgo = ConfigurationSignal()
 
     # Instantiate widget
     widget = TrainingWidgetWrapper(myalgo)

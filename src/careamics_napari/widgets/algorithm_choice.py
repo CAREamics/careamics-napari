@@ -10,12 +10,12 @@ from qtpy.QtWidgets import (
 )
 
 from careamics_napari.careamics_utils import get_available_algorithms, get_algorithm
-from careamics_napari.widgets.signals import AlgorithmSignal
+from careamics_napari.widgets.signals import ConfigurationSignal
 
 
 class AlgorithmChoiceWidget(QComboBox):
 
-    def __init__(self, signal: Optional[AlgorithmSignal] = None):
+    def __init__(self, signal: Optional[ConfigurationSignal] = None):
         super().__init__()
 
         self.signal = signal
@@ -50,14 +50,14 @@ class AlgorithmChoiceWidget(QComboBox):
 
         # emit the signal
         if self.signal is not None:
-            self.signal.name = self.current_algorithm
+            self.signal.algorithm = self.current_algorithm
 
 
 if __name__ == "__main__":
     from qtpy.QtWidgets import QApplication
     import sys
 
-    myalgo = AlgorithmSignal()
+    myalgo = ConfigurationSignal()
 
     @myalgo.events.name.connect
     def print_algorithm(name: str):
