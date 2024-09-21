@@ -35,7 +35,7 @@ class AxesWidget(QWidget):
 
     def __init__(self, signal: Optional[ConfigurationSignal] = None, n_axes=3, is_3D=False):
         super().__init__()
-        self.signal = signal
+        self.configuration_signal = signal
 
         # max axes is 6
         assert 0 < n_axes <= 6
@@ -71,12 +71,15 @@ class AxesWidget(QWidget):
         # validate text
         self._validate_text()
 
-        # set up signal handling when axes change
+        # set up signal handling when axes and 3D change
         self.text_field.textChanged.connect(self._axes_changed)
 
+        if self.configuration_signal is not None:
+            self.configuration_signal.events.is_3d.connect(self.update_is_3D)
+
     def _axes_changed(self):
-        if self.signal is not None and self.is_text_valid:
-            self.signal.use_channels = "C" in self.get_axes()
+        if self.configuration_signal is not None and self.is_text_valid:
+            self.configuration_signal.use_channels = "C" in self.get_axes()
 
     def _validate_text(self):
         axes = self.get_axes()

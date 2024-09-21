@@ -47,7 +47,7 @@ class TrainWidget(QWidget):
         super().__init__()
 
         # add signal
-        self.algorithm_signal = algorithm_signal
+        self.configuration_signal = algorithm_signal
 
         self.init_ui()
 
@@ -76,7 +76,7 @@ class TrainWidget(QWidget):
         gpu_button.setAlignment(Qt.AlignmentFlag.AlignRight)
         gpu_button.setContentsMargins(0, 5, 0, 0) # top margin
 
-        algo_choice = AlgorithmChoiceWidget(signal=self.algorithm_signal)
+        algo_choice = AlgorithmChoiceWidget(signal=self.configuration_signal)
         gpu_button.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
         algo_panel.layout().addWidget(algo_choice)
@@ -99,8 +99,8 @@ class TrainWidget(QWidget):
 
 
         # connect signals
-        if self.algorithm_signal is not None:
-            self.algorithm_signal.events.algorithm.connect(self.set_data_from_algorithm)
+        if self.configuration_signal is not None:
+            self.configuration_signal.events.algorithm.connect(self.set_data_from_algorithm)
 
     def set_data_from_algorithm(self, name: str) -> None:
         """Set the data selection widget based on the algorithm."""

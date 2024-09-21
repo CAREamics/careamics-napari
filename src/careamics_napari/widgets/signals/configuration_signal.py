@@ -8,6 +8,8 @@ if TYPE_CHECKING:
 
     class ConfigurationSignalGroup(SignalGroup):
         algorithm: SignalInstance
+        use_channels: SignalInstance
+        is_3d: SignalInstance
 
 
 @evented
@@ -18,3 +20,4 @@ class ConfigurationSignal:
 
     algorithm: str = ""
     use_channels: bool = False
+    is_3d: bool = False

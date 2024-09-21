@@ -112,22 +112,3 @@ def load_button(Model: Path):
         The path to the model file.
     """
     pass
-
-
-@magic_factory(
-    auto_call=True, use_3d={"label": " ", "widget_type": "Checkbox", "visible": True}
-)
-def enable_3d(use_3d: bool = False) -> bool:
-    """A checkbox to enable 3D mode.
-
-    Parameters
-    ----------
-    use3d : bool, default=False
-        Whether to enable 3D mode.
-
-    Returns
-    -------
-    bool
-        Whether 3D mode is enabled.
-    """
-    return use_3d
