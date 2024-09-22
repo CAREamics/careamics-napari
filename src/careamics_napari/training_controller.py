@@ -1,29 +1,23 @@
 
 from careamics_napari.training_widget import TrainWidget
+from careamics_napari.widgets.signals import ConfigurationSignal
+
+
+def get_training_plugin():
+    controller = TrainingController()
+
+    return controller.get_widget()
+
 
 class TrainingController:
 
     def __init__(self) -> None:
+
+        # create signals
+        config_signal = ConfigurationSignal()
         
-        self.train_widget = TrainWidget()
+        self.train_widget = TrainWidget(config_signal)
 
     def get_widget(self) -> TrainWidget:
         return self.train_widget
     
-
-if __name__ == "__main__":
-    from qtpy.QtWidgets import QApplication
-    import sys
-
-    # Create a QApplication instance
-    app = QApplication(sys.argv)
-
-    # Instantiate widget
-    controller = TrainingController()
-    widget = controller.get_widget()
-
-    # Show the widget
-    widget.show()
-
-    # Run the application event loop
-    sys.exit(app.exec_())
