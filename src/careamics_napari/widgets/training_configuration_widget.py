@@ -18,6 +18,7 @@ from careamics_napari.resources import ICON_GEAR
 from careamics_napari.widgets import (
     AxesWidget,
     create_int_spinbox,
+    AdvancedConfigurationWindow
 )
 
 
@@ -25,9 +26,9 @@ class ConfigurationWidget(QGroupBox):
 
     def __init__(self, signal: Optional[ConfigurationSignal] = None):
         super().__init__()
-        self.configuration_signal = signal
 
-        self.configuration_window = None
+        self.configuration_signal = signal
+        self.config_window = None
 
         self.setTitle("Training parameters")
         # self.setMinimumWidth(100)
@@ -74,14 +75,16 @@ class ConfigurationWidget(QGroupBox):
         self.layout().setContentsMargins(5, 20, 5, 10)
 
         # set actions
-        self.training_expert_btn.clicked.connect(self._configuration_window)
+        self.training_expert_btn.clicked.connect(self._show_configuration_window)
         self.enable_3d.clicked.connect(self._enable_3d_changed)
 
-    def _configuration_window(self):
-        if self.configuration_window is None:
-            self.configuration_window = QPushButton() # TODO
+    def _show_configuration_window(self):
+        if self.config_window is None or self.config_window.isHidden():
+            self.config_window = (
+                AdvancedConfigurationWindow(self, self.configuration_signal)
+            )
 
-        self.configuration_window.show()
+            self.config_window.show()
 
     def _enable_3d_changed(self: Self, state: bool) -> None:
         self.patch_Z_spin.setVisible(state)

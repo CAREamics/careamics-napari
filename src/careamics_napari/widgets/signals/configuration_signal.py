@@ -18,6 +18,25 @@ class ConfigurationSignal:
     if TYPE_CHECKING:
         events: ConfigurationSignalGroup
 
-    algorithm: str = ""
+    # signals used to change states across widgets
+    algorithm: str = "n2v"
     use_channels: bool = False
     is_3d: bool = False
+
+    # parameters set by widgets
+    path_size_xy: int = 64
+    path_size_z: int = 16
+    n_epochs: int = 30
+    batch_size: int = 16
+
+    experiment_name = ""
+    x_flip: bool = True
+    y_flip: bool = True
+    rotations: bool = True
+    independent_channels: bool = False
+    n_channels_n2v: int = 1
+    n_channels_in_care: int = 1
+    n_channels_out_care: int = 1
+    use_n2v2: bool = False
+    depth: int = 2
+    size_conv_filters: int = 32

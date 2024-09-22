@@ -3,20 +3,11 @@ from enum import Enum
 from typing import Optional, Any
 from typing_extensions import Self
 
-from qtpy import QtGui
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (
-    QGroupBox,
     QWidget,
     QVBoxLayout,
     QHBoxLayout,
-    QPushButton,
-    QFormLayout,
-    QComboBox,
-    QFileDialog,
-    QLabel,
-    QTabWidget,
-    QCheckBox,
     QStackedWidget 
 )
 
@@ -27,6 +18,7 @@ from careamics_napari.widgets import (
     AlgorithmChoiceWidget,
     DataSelectionWidget,
     ScrollWidgetWrapper,
+    ConfigurationWidget
 )
 from careamics_napari.widgets.signals import ConfigurationSignal
 
@@ -96,11 +88,14 @@ class TrainWidget(QWidget):
 
         self.layout().addWidget(self.data_stck)
 
-
+        # add configuration widget
+        self.config_widget = ConfigurationWidget(self.configuration_signal)
+        self.layout().addWidget(self.config_widget)
 
         # connect signals
         if self.configuration_signal is not None:
             self.configuration_signal.events.algorithm.connect(self.set_data_from_algorithm)
+            self.set_data_from_algorithm(self.configuration_signal.algorithm)
 
     def set_data_from_algorithm(self, name: str) -> None:
         """Set the data selection widget based on the algorithm."""
