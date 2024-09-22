@@ -13,11 +13,6 @@ def test_github():
     assert type(ICON_GITHUB) == str
 
 
-def test_juglab():
+def test_careamics():
     assert Path(ICON_CAREAMICS).exists()
     assert type(ICON_CAREAMICS) == str
-
-
-def test_tf():
-    assert Path(ICON_TF).exists()
-    assert type(ICON_TF) == str

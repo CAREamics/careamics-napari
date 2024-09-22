@@ -33,7 +33,12 @@ class AxesWidget(QWidget):
     Axes are validated based on the number of axes and whether 3D is enabled.
     """
 
-    def __init__(self, signal: Optional[ConfigurationSignal] = None, n_axes=3, is_3D=False):
+    def __init__(
+            self, 
+            n_axes=3, 
+            is_3D=False, 
+            signal: Optional[ConfigurationSignal] = None
+        ) -> None:
         super().__init__()
         self.configuration_signal = signal
 

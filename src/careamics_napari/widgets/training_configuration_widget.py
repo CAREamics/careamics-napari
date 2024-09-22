@@ -45,7 +45,7 @@ class ConfigurationWidget(QGroupBox):
         self.patch_Z_spin = create_int_spinbox(16, 512, 16, 8, False, tooltip='Dimension of the patches in Z')
 
         # axes
-        self.axes_widget = AxesWidget(signal)
+        self.axes_widget = AxesWidget(signal=signal)
 
         # others
         self.n_epochs_spin = create_int_spinbox(1, 1000, 30, tooltip='Number of epochs')
