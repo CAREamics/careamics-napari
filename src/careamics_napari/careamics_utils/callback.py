@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from enum import IntEnum
 from typing import Any
 
 from psygnal import evented
@@ -7,26 +6,7 @@ from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.callbacks import Callback
 from typing_extensions import Self
 
-
-class TrainingState(IntEnum):
-    IDLE = 0
-    TRAINING = 1
-    DONE = 2
-    STOPPED = 3
-    CRASHED = 4
-
-
-@evented
-@dataclass
-class TrainingStatus:
-    n_epochs: int = -1
-    n_batches: int = -1
-    epoch_idx: int = -1
-    batch_idx: int = -1
-    loss: float = -1
-    val_loss: float = -1
-    state: TrainingState = TrainingState.IDLE
-
+from careamics_napari.widgets.signals.training_status import TrainingStatus, TrainingState
 
 class UpdaterCallBack(Callback):
     def __init__(self: Self, train_status: TrainingStatus) -> None:
@@ -62,3 +42,5 @@ class UpdaterCallBack(Callback):
         self, trainer: Trainer, pl_module: LightningModule, batch: Any, batch_idx: int
     ) -> None:
         self.train_status.batch_idx = batch_idx
+
+

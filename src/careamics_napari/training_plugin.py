@@ -18,9 +18,10 @@ from careamics_napari.widgets import (
     AlgorithmChoiceWidget,
     DataSelectionWidget,
     ScrollWidgetWrapper,
-    ConfigurationWidget
+    ConfigurationWidget,
+    TrainingWidget
 )
-from careamics_napari.widgets.signals import ConfigurationSignal
+from careamics_napari.widgets.signals import ConfigurationSignal, TrainingStatus
 
 class State(Enum):
     IDLE = 0
@@ -28,18 +29,20 @@ class State(Enum):
 
 class TrainingWidgetWrapper(ScrollWidgetWrapper):
     def __init__(self: Self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(TrainWidget(*args, **kwargs))
+        super().__init__(TrainPlugin(*args, **kwargs))
 
 
-class TrainWidget(QWidget):
+class TrainPlugin(QWidget):
     def __init__(
             self: Self,
-            algorithm_signal: Optional[ConfigurationSignal] = None
+            configuration_signal: Optional[ConfigurationSignal] = None,
+            train_signal: Optional[TrainingStatus] = None
     ) -> None:
         super().__init__()
 
         # add signal
-        self.configuration_signal = algorithm_signal
+        self.configuration_signal = configuration_signal
+        self.train_signal = train_signal
 
         self.init_ui()
 
@@ -92,6 +95,11 @@ class TrainWidget(QWidget):
         self.config_widget = ConfigurationWidget(self.configuration_signal)
         self.layout().addWidget(self.config_widget)
 
+        # add train widget
+        self.train_widget = TrainingWidget(self.train_signal)
+        self.layout().addWidget(self.train_widget)
+
+
         # connect signals
         if self.configuration_signal is not None:
             self.configuration_signal.events.algorithm.connect(self._set_data_from_algorithm)
@@ -119,9 +127,10 @@ if __name__ == "__main__":
 
     # Signals
     myalgo = ConfigurationSignal()
+    mytrain = TrainingStatus()
 
     # Instantiate widget
-    widget = TrainingWidgetWrapper(myalgo)
+    widget = TrainingWidgetWrapper(myalgo, mytrain)
 
     # Show the widget
     widget.show()

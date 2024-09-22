@@ -14,3 +14,4 @@ from .algorithm_choice import AlgorithmChoiceWidget
 from .data_selection_widget import DataSelectionWidget
 from .configuration_window import AdvancedConfigurationWindow
 from .training_configuration_widget import ConfigurationWidget
+from .training_widget import TrainingWidget
