@@ -90,7 +90,6 @@ class ConfigurationWidget(QGroupBox):
         self.patch_Z_spin.setVisible(state)
         
         if self.configuration_signal is not None:
-            print(f"State here is {state} with type {type(state)}")
             self.configuration_signal.is_3d = state
 
 if __name__ == "__main__":

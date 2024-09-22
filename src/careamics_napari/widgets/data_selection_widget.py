@@ -14,6 +14,7 @@ from careamics_napari.widgets import (
     two_layers_choice,
     four_layers_choice
 )
+from careamics_napari.widgets.signals import ConfigurationSignal
 
 if TYPE_CHECKING:
     import napari
@@ -33,6 +34,7 @@ class DataSelectionWidget(QTabWidget):
 
     def __init__(
             self: Self, 
+            signal: Optional[ConfigurationSignal] = None,
             use_target: bool = False, 
             napari_viewer: Optional[napari.Viewer] = None
     ) -> None:
@@ -46,6 +48,7 @@ class DataSelectionWidget(QTabWidget):
             Napari viewer.
         """
         super().__init__()
+        self.signal = signal
         self.use_target = use_target
             
         # QTabs
@@ -64,7 +67,9 @@ class DataSelectionWidget(QTabWidget):
         self._set_layer_tab(layer_tab, napari_viewer)
         self._set_disk_tab(disk_tab)
 
-
+        # set actions
+        if self.signal is not None:
+            self.currentChanged.connect(self._set_data_source)
 
     def _set_layer_tab(
             self, 
@@ -170,19 +175,41 @@ class DataSelectionWidget(QTabWidget):
         buttons.setLayout(form)
         disk_tab.layout().addWidget(buttons)
 
+    def _set_data_source(self, index: int) -> None:
+        if self.signal is not None:
+            self.signal.load_from_disk = index == self.count() - 1
+
 
 if __name__ == "__main__":
-    from qtpy.QtWidgets import QApplication
-    import sys
+    # from qtpy.QtWidgets import QApplication
+    # import sys
 
-    # Create a QApplication instance
-    app = QApplication(sys.argv)
+    # # Create a QApplication instance
+    # app = QApplication(sys.argv)
 
-    # Instantiate widget
-    widget = DataSelectionWidget(True)
+    # # create signal
+    # signal = ConfigurationSignal()
 
-    # Show the widget
-    widget.show()
+    # # Instantiate widget
+    # widget = DataSelectionWidget(signal, True)
 
-    # Run the application event loop
-    sys.exit(app.exec_())
+    # # Show the widget
+    # widget.show()
+
+    # # Run the application event loop
+    # sys.exit(app.exec_())
+
+    import napari
+    # create a Viewer
+    viewer = napari.Viewer()
+
+    # add napari-n2v plugin
+    viewer.window.add_dock_widget(DataSelectionWidget(
+        ConfigurationSignal(), False, viewer
+    ))
+
+    # add image to napari
+    # viewer.add_image(data[0][0], name=data[0][1]['name'])
+
+    # start UI
+    napari.run()

@@ -79,8 +79,8 @@ class TrainWidget(QWidget):
         # add data tabs
         self.data_stck = QStackedWidget()
         self.data_layers = [
-            DataSelectionWidget(),
-            DataSelectionWidget(True),
+            DataSelectionWidget(self.configuration_signal),
+            DataSelectionWidget(self.configuration_signal, True),
         ]
         for layer in self.data_layers:
             self.data_stck.addWidget(layer)
@@ -94,10 +94,10 @@ class TrainWidget(QWidget):
 
         # connect signals
         if self.configuration_signal is not None:
-            self.configuration_signal.events.algorithm.connect(self.set_data_from_algorithm)
-            self.set_data_from_algorithm(self.configuration_signal.algorithm)
-
-    def set_data_from_algorithm(self, name: str) -> None:
+            self.configuration_signal.events.algorithm.connect(self._set_data_from_algorithm)
+            self._set_data_from_algorithm(self.configuration_signal.algorithm)
+            
+    def _set_data_from_algorithm(self, name: str) -> None:
         """Set the data selection widget based on the algorithm."""
         print(name)
         if (

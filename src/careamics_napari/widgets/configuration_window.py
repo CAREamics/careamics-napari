@@ -197,7 +197,6 @@ class AdvancedConfigurationWindow(QDialog):
 
 
     def _update_to_channels(self, use_channels: bool) -> None:
-        print(f"Use channels is {use_channels}")
         self.channels.setVisible(use_channels)
 
     def _save(self) -> None:

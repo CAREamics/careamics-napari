@@ -96,8 +96,8 @@ def four_layers_choice() -> Container:
         The widget selecting four layers from the napari viewer.
     """
     # TODO can the text "TrainTarget" be made more friendly?
-    img = two_layers_choice(annotation=Image, name=["Train", "TrainTarget"]) 
-    lbl = two_layers_choice(annotation=Image, name=["Val", "ValTarget"])
+    img = two_layers_choice(names=["Train", "TrainTarget"]) 
+    lbl = two_layers_choice(names=["Val", "ValTarget"])
 
     return img.extend(lbl)
 

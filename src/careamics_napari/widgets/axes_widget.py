@@ -80,6 +80,7 @@ class AxesWidget(QWidget):
     def _axes_changed(self):
         if self.configuration_signal is not None and self.is_text_valid:
             self.configuration_signal.use_channels = "C" in self.get_axes()
+            self.configuration_signal.axes = self.get_axes()
 
     def _validate_text(self):
         axes = self.get_axes()
