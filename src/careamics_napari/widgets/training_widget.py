@@ -46,14 +46,17 @@ class TrainingWidget(QGroupBox):
         if self.train_status is not None:
             # what to do when the buttons are clicked
             self.train_button.clicked.connect(self._train_stop_clicked)
-            self.reset_model_button.clicked.connect(self._reset_model_clicked)
+            self.reset_model_button.clicked.connect(self._reset_clicked)
 
             # listening to the signal
             self.train_status.events.state.connect(self._update_button)
 
     def _train_stop_clicked(self):
         if self.train_status is not None:
-            if self.train_status.state == TrainingState.IDLE:
+            if (
+                self.train_status.state == TrainingState.IDLE
+                or self.train_status.state == TrainingState.DONE
+            ):
                 self.train_status.state = TrainingState.TRAINING
                 self.reset_model_button.setEnabled(False)
                 self.reset_model_button.setText("")
@@ -68,7 +71,7 @@ class TrainingWidget(QGroupBox):
                 self.train_button.setText('Stop')
 
 
-    def _reset_model_clicked(self):
+    def _reset_clicked(self):
         if self.train_status is not None:
             if self.train_status.state != TrainingState.TRAINING:
                 self.train_status.state = TrainingState.IDLE

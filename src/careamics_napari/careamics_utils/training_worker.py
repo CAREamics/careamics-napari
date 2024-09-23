@@ -40,6 +40,7 @@ def train_worker(
 
         if update.type == UpdateType.STATE:
             if update.value == TrainingState.DONE:
+                yield update
                 break
         else:
             yield update
