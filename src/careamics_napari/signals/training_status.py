@@ -34,6 +34,10 @@ class TrainingState(IntEnum):
     STOPPED = 3
     CRASHED = 4
 
+@dataclass
+class Stopper:
+    stop: bool = False
+
 
 @dataclass
 class Update:

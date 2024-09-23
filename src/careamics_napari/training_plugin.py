@@ -27,7 +27,7 @@ from careamics_napari.signals import (
     TrainingStatus, 
     TrainingState,
     Update,
-    UpdateType
+    Stopper
 )
 from careamics_napari.careamics_utils.training_worker import train_worker
 
@@ -60,6 +60,7 @@ class TrainPlugin(QWidget):
         # create signals
         self.config_signal = ConfigurationSignal()
         self.train_signal = TrainingStatus()
+        self.stopper = Stopper()
 
         self.init_ui()
 
@@ -133,14 +134,17 @@ class TrainPlugin(QWidget):
 
     def _training_state_changed(self, state: TrainingState) -> None:
         if state == TrainingState.TRAINING:
+            self.stopper.stop = False
             self.train_worker = train_worker(
-                self.config_signal, 
+                self.config_signal,
+                self.stopper
             )
             
             self.train_worker.yielded.connect(self._update)
             self.train_worker.start()
 
-        # elif state == TrainingState.STOPPED:
+        elif state == TrainingState.STOPPED:
+            self.stopper.stop = True
         #     if self.careamist is not None:
         #         self.careamist.stop_training()
 

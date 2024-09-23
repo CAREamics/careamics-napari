@@ -2,6 +2,7 @@
 from typing import Generator
 from queue import Queue
 from threading import Thread
+import time
 
 from napari.qt.threading import thread_worker
 
@@ -11,11 +12,11 @@ from careamics.config.support import SupportedAlgorithm
 from careamics_napari.careamics_utils.callback import UpdaterCallBack
 from careamics_napari.careamics_utils.configuration import create_configuration
 from careamics_napari.signals import (
-    TrainingStatus, 
     Update,
     UpdateType,
     TrainingState, 
-    ConfigurationSignal
+    ConfigurationSignal,
+    Stopper
 )
 
 
@@ -25,13 +26,14 @@ from careamics_napari.signals import (
 @thread_worker
 def train_worker(
     config_signal: ConfigurationSignal,
+    stopper: Stopper
 ) -> Generator[Update, None, None]:
 
     # create update queue
     update_queue = Queue(10)
 
     # start training thread
-    training = Thread(target=_train, args=(config_signal, update_queue))
+    training = Thread(target=_train, args=(config_signal, update_queue, stopper))
     training.start()
 
     # loop looking for update events
@@ -47,7 +49,7 @@ def train_worker(
 
 
 
-def _train(config_signal: ConfigurationSignal, update_queue: Queue) -> None:
+def _train(config_signal: ConfigurationSignal, update_queue: Queue, stopper: Stopper) -> None:
     
     # get configuration
     # config = create_configuration(config_signal)
@@ -86,14 +88,23 @@ def _train(config_signal: ConfigurationSignal, update_queue: Queue) -> None:
         #     train_data_target=train_data_target,
         #     val_data_target=val_data_target,
         # )
-        update_queue.put(Update(UpdateType.MAX_EPOCH, 10_000 // 100))
+        update_queue.put(Update(UpdateType.MAX_EPOCH, 10_000 // 10))
         update_queue.put(Update(UpdateType.MAX_BATCH, 10_000))
         for i in range(10_000):
-            if i % 100 == 0:
-                update_queue.put(Update(UpdateType.EPOCH, i // 100))
+
+            if stopper.stop:
+                update_queue.put(Update(UpdateType.STATE, TrainingState.STOPPED))
+                break
+
+            if i % 10 == 0:
+                update_queue.put(Update(UpdateType.EPOCH, i // 10))
                 print(i)
 
             update_queue.put(Update(UpdateType.BATCH, i))
+
+            time.sleep(0.2) 
+
+            
 
 
     except Exception as e:
