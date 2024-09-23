@@ -13,7 +13,7 @@ from qtpy.QtWidgets import (
     QCheckBox,
 )
 
-from careamics_napari.widgets.signals import ConfigurationSignal
+from careamics_napari.signals import ConfigurationSignal
 from careamics_napari.resources import ICON_GEAR
 from careamics_napari.widgets import (
     AxesWidget,

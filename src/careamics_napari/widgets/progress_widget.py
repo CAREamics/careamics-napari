@@ -8,7 +8,7 @@ from qtpy.QtWidgets import (
     QGroupBox,
 )
 
-from careamics_napari.widgets.signals import TrainingStatus, TrainingState
+from careamics_napari.signals import TrainingStatus, TrainingState
 from careamics_napari.widgets import create_progressbar, TBPlotWidget
 
 class ProgressWidget(QGroupBox):
@@ -28,13 +28,13 @@ class ProgressWidget(QGroupBox):
         self.layout().setContentsMargins(20, 20, 20, 0)
 
         self.pb_epochs = create_progressbar(
-            max_value=self.train_status.n_epochs,
-            text_format=f'Epoch ?/{self.train_status.n_epochs}'
+            max_value=self.train_status.max_epochs,
+            text_format=f'Epoch ?/{self.train_status.max_epochs}'
         )
 
         self.pb_batch = create_progressbar(
-            max_value=self.train_status.n_batches,
-            text_format=f'Batch ?/{self.train_status.n_batches}'
+            max_value=self.train_status.max_batches,
+            text_format=f'Batch ?/{self.train_status.max_batches}'
         )
 
         self.layout().addWidget(self.pb_epochs)
@@ -49,9 +49,9 @@ class ProgressWidget(QGroupBox):
             self.train_status.events.state.connect(self._update_trainng_state)
 
             self.train_status.events.epoch_idx.connect(self._update_epoch)
-            self.train_status.events.n_epochs.connect(self._update_max_epoch)
+            self.train_status.events.max_epochs.connect(self._update_max_epoch)
             self.train_status.events.batch_idx.connect(self._update_batch)
-            self.train_status.events.n_batches.connect(self._update_max_batch)
+            self.train_status.events.max_batches.connect(self._update_max_batch)
 
             # TODO is it enough to listen to the val loss?
             self.train_status.events.val_loss.connect(self._update_loss)
@@ -65,15 +65,15 @@ class ProgressWidget(QGroupBox):
 
     def _update_epoch(self, epoch: int):
         self.pb_epochs.setValue(epoch+1)
-        self.pb_epochs.setFormat(f'Epoch {epoch+1}/{self.train_status.n_epochs}')
+        self.pb_epochs.setFormat(f'Epoch {epoch+1}/{self.train_status.max_epochs}')
 
     def _update_max_batch(self):
-        self.pb_batch.setMaximum(self.train_status.n_batches)
+        self.pb_batch.setMaximum(self.train_status.max_batches)
 
     def _update_batch(self):
         self.pb_batch.setValue(self.train_status.batch_idx+1)
         self.pb_batch.setFormat(
-            f'Batch {self.train_status.batch_idx+1}/{self.train_status.n_batches}')
+            f'Batch {self.train_status.batch_idx+1}/{self.train_status.max_batches}')
 
     def _update_loss(self):
         self.plot.update_plot(

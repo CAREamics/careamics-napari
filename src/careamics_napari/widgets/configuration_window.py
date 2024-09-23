@@ -18,7 +18,7 @@ from qtpy.QtWidgets import (
 
 from careamics.config.support import SupportedAlgorithm
 
-from careamics_napari.widgets.signals import ConfigurationSignal
+from careamics_napari.signals import ConfigurationSignal
 from careamics_napari.widgets import create_int_spinbox
 
 

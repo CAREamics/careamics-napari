@@ -9,8 +9,7 @@ from careamics.config import (
 from careamics.config.transformations import XYFlipModel, XYRandomRotate90Model
 from careamics.config.support import SupportedAlgorithm
 
-from careamics_napari.widgets.signals import ConfigurationSignal
-
+from careamics_napari.signals import ConfigurationSignal
 
 
 def create_configuration(signal: ConfigurationSignal) -> Configuration:

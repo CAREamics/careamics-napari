@@ -10,7 +10,7 @@ from qtpy.QtWidgets import (
 )
 
 from careamics_napari.careamics_utils import get_available_algorithms, get_algorithm
-from careamics_napari.widgets.signals import ConfigurationSignal
+from careamics_napari.signals import ConfigurationSignal
 
 
 class AlgorithmChoiceWidget(QComboBox):

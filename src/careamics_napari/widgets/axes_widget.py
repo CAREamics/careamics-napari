@@ -5,7 +5,7 @@ from qtpy import QtGui
 from qtpy.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QWidget
 
 from careamics_napari.utils import REF_AXES, are_axes_valid, filter_dimensions
-from careamics_napari.widgets.signals import ConfigurationSignal
+from careamics_napari.signals import ConfigurationSignal
 
 class Highlight(Enum):
     VALID = 0

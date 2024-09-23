@@ -14,7 +14,7 @@ from careamics_napari.widgets import (
     two_layers_choice,
     four_layers_choice
 )
-from careamics_napari.widgets.signals import ConfigurationSignal
+from careamics_napari.signals import ConfigurationSignal
 
 if TYPE_CHECKING:
     import napari

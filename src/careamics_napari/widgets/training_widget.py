@@ -11,7 +11,7 @@ from qtpy.QtWidgets import (
     QPushButton,
 )
 
-from careamics_napari.widgets.signals import TrainingStatus, TrainingState
+from careamics_napari.signals import TrainingStatus, TrainingState
 
 class TrainingWidget(QGroupBox):
         
@@ -70,7 +70,7 @@ class TrainingWidget(QGroupBox):
 
     def _reset_model_clicked(self):
         if self.train_status is not None:
-            if self.train_status.state != TrainingState:
+            if self.train_status.state != TrainingState.TRAINING:
                 self.train_status.state = TrainingState.IDLE
                 self.train_button.setText('Train')
                 self.reset_model_button.setEnabled(False)

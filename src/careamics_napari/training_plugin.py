@@ -1,5 +1,5 @@
 """CAREamics training Qt widget."""
-from typing import Optional, Any, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from typing_extensions import Self
 
 from qtpy.QtCore import Qt
@@ -22,8 +22,14 @@ from careamics_napari.widgets import (
     TrainingWidget,
     ProgressWidget
 )
-from careamics_napari.widgets.signals import ConfigurationSignal, TrainingStatus
-from careamics_napari.careamics_utils.training_worker import train_worker, TrainingState
+from careamics_napari.signals import (
+    ConfigurationSignal, 
+    TrainingStatus, 
+    TrainingState,
+    Update,
+    UpdateType
+)
+from careamics_napari.careamics_utils.training_worker import train_worker
 
 if TYPE_CHECKING:
     import napari
@@ -118,26 +124,29 @@ class TrainPlugin(QWidget):
 
         # connect signals
         if self.config_signal is not None:
+            # changes from the selected algorithm
             self.config_signal.events.algorithm.connect(self._set_data_from_algorithm)
-            self._set_data_from_algorithm(self.config_signal.algorithm)
+            self._set_data_from_algorithm(self.config_signal.algorithm) # force update
+
+            # changes from the training state
             self.train_signal.events.state.connect(self._training_state_changed)
 
     def _training_state_changed(self, state: TrainingState) -> None:
         if state == TrainingState.TRAINING:
             self.train_worker = train_worker(
                 self.config_signal, 
-                self.train_signal
             )
             
-            self.train_worker.yielded.connect(self._register_careamist)
+            self.train_worker.yielded.connect(self._update)
             self.train_worker.start()
 
-        elif state == TrainingState.STOPPED:
-            if self.careamist is not None:
-                self.careamist.stop_training()
+        # elif state == TrainingState.STOPPED:
+        #     if self.careamist is not None:
+        #         self.careamist.stop_training()
 
-    def _register_careamist(self, careamist: CAREamist) -> None:
-        self.careamist = careamist
+    def _update(self, update: Update) -> None:
+        """Update the signal from the training worker."""
+        self.train_signal.update(update)
             
     def _set_data_from_algorithm(self, name: str) -> None:
         """Set the data selection widget based on the algorithm."""
