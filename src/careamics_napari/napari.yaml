@@ -3,7 +3,7 @@ display_name: CAREamics
 contributions:
   commands:
     - id: careamics-napari.make_train_widget
-      python_name: careamics_napari.training_controller:get_training_plugin
+      python_name: careamics_napari.training_plugin:TrainPluginWrapper
       title: Train CAREamics
   widgets:
     - command: careamics-napari.make_train_widget

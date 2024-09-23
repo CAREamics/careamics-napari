@@ -28,7 +28,8 @@ from careamics_napari.widgets import create_int_spinbox
 # n2v masking parameters
 
 # TODO should it be a singleton to make sure there only a single instance at a time?
-
+# TODO add checkpointing parameters
+# TODO add minimum percentage and minimum val data
 # TODO add default values from the configuration_signal
 class AdvancedConfigurationWindow(QDialog):
 

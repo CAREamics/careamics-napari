@@ -81,10 +81,10 @@ def two_layers_choice(names: list[str] = ["Train", "Val"]) -> Container:
     if names[0] == names[1]:
         raise ValueError("The names must be different.")
     
-    img = layer_choice(annotation=Image, name=names[0])
-    lbl = layer_choice(annotation=Image, name=names[1])
+    img_1 = layer_choice(annotation=Image, name=names[0])
+    img_2 = layer_choice(annotation=Image, name=names[1])
 
-    return Container(widgets=[img, lbl])
+    return Container(widgets=[img_1, img_2])
 
 
 def four_layers_choice() -> Container:
@@ -96,10 +96,18 @@ def four_layers_choice() -> Container:
         The widget selecting four layers from the napari viewer.
     """
     # TODO can the text "TrainTarget" be made more friendly?
-    img = two_layers_choice(names=["Train", "TrainTarget"]) 
-    lbl = two_layers_choice(names=["Val", "ValTarget"])
+    img_pair_1 = two_layers_choice(names=["Train", "TrainTarget"]) 
+    img_pair_2 = two_layers_choice(names=["Val", "ValTarget"])
 
-    return img.extend(lbl)
+    img_pair_1.append(img_pair_2)
+
+    return Container(widgets=[
+            img_pair_1.Train, 
+            img_pair_1.TrainTarget, 
+            img_pair_2.Val,
+            img_pair_2.ValTarget
+        ]
+    )
 
 
 @magic_factory(auto_call=True, Model={"mode": "r", "filter": "*.ckpt *.zip"})

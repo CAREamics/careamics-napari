@@ -8,7 +8,6 @@ from qtpy.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,
     QGroupBox,
-    QComboBox,
     QPushButton,
 )
 
@@ -53,30 +52,32 @@ class TrainingWidget(QGroupBox):
             self.train_status.events.state.connect(self._update_button)
 
     def _train_stop_clicked(self):
-        if self.train_status.state == TrainingState.IDLE:
-            self.train_status.state = TrainingState.TRAINING
-            self.reset_model_button.setEnabled(False)
-            self.reset_model_button.setText("")
-            self.train_button.setText('Stop')
+        if self.train_status is not None:
+            if self.train_status.state == TrainingState.IDLE:
+                self.train_status.state = TrainingState.TRAINING
+                self.reset_model_button.setEnabled(False)
+                self.reset_model_button.setText("")
+                self.train_button.setText('Stop')
 
-        elif self.train_status.state == TrainingState.TRAINING:
-            self.train_status.state = TrainingState.STOPPED
-            self.train_button.setText('Resume')
+            elif self.train_status.state == TrainingState.TRAINING:
+                self.train_status.state = TrainingState.STOPPED
+                self.train_button.setText('Resume')
 
-        elif self.train_status.state == TrainingState.STOPPED:
-            self.train_status.state = TrainingState.TRAINING
-            self.train_button.setText('Stop')
+            elif self.train_status.state == TrainingState.STOPPED:
+                self.train_status.state = TrainingState.TRAINING
+                self.train_button.setText('Stop')
 
 
     def _reset_model_clicked(self):
-        if self.train_status.state != TrainingState:
-            self.train_status.state = TrainingState.IDLE
-            self.train_button.setText('Train')
-            self.reset_model_button.setEnabled(False)
-            self.reset_model_button.setText("")
+        if self.train_status is not None:
+            if self.train_status.state != TrainingState:
+                self.train_status.state = TrainingState.IDLE
+                self.train_button.setText('Train')
+                self.reset_model_button.setEnabled(False)
+                self.reset_model_button.setText("")
 
 
-    def _update_button(self, new_state):
+    def _update_button(self, new_state: TrainingState):
         if (
             new_state == TrainingState.DONE 
             or new_state == TrainingState.CRASHED

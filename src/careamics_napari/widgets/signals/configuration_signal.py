@@ -27,6 +27,14 @@ class ConfigurationSignal:
 
     # parameters set by widgets
     load_from_disk: bool = True
+    layer_train: str = ""
+    layer_train_target: str = ""
+    layer_val: str = ""
+    layer_val_target: str = ""
+    path_train: str = ""
+    path_train_target: str = ""
+    path_val: str = ""
+    path_val_target: str = ""
 
     axes: str = "YX"
 

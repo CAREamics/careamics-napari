@@ -1,6 +1,5 @@
 """CAREamics training Qt widget."""
-from enum import Enum
-from typing import Optional, Any
+from typing import Optional, Any, TYPE_CHECKING
 from typing_extensions import Self
 
 from qtpy.QtCore import Qt
@@ -11,6 +10,7 @@ from qtpy.QtWidgets import (
     QStackedWidget 
 )
 
+from careamics import CAREamist
 from careamics.config.support import SupportedAlgorithm
 from careamics_napari.widgets import (
     CAREamicsBanner,
@@ -19,30 +19,41 @@ from careamics_napari.widgets import (
     DataSelectionWidget,
     ScrollWidgetWrapper,
     ConfigurationWidget,
-    TrainingWidget
+    TrainingWidget,
+    ProgressWidget
 )
 from careamics_napari.widgets.signals import ConfigurationSignal, TrainingStatus
+from careamics_napari.careamics_utils.training_worker import train_worker, TrainingState
 
-class State(Enum):
-    IDLE = 0
-    RUNNING = 1
+if TYPE_CHECKING:
+    import napari
 
-class TrainingWidgetWrapper(ScrollWidgetWrapper):
-    def __init__(self: Self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(TrainPlugin(*args, **kwargs))
+# at run time
+try:
+    import napari
+except ImportError:
+    _has_napari = False
+else:
+    _has_napari = True
+
+
+class TrainPluginWrapper(ScrollWidgetWrapper):
+    def __init__(self: Self, napari_viewer: Optional[napari.Viewer] = None) -> None:
+        super().__init__(TrainPlugin(napari_viewer))
 
 
 class TrainPlugin(QWidget):
     def __init__(
             self: Self,
-            configuration_signal: Optional[ConfigurationSignal] = None,
-            train_signal: Optional[TrainingStatus] = None
+            napari_viewer: Optional[napari.Viewer] = None,
     ) -> None:
         super().__init__()
+        self.viewer = napari_viewer
+        self.careamist = None
 
-        # add signal
-        self.configuration_signal = configuration_signal
-        self.train_signal = train_signal
+        # create signals
+        self.config_signal = ConfigurationSignal()
+        self.train_signal = TrainingStatus()
 
         self.init_ui()
 
@@ -71,7 +82,7 @@ class TrainPlugin(QWidget):
         gpu_button.setAlignment(Qt.AlignmentFlag.AlignRight)
         gpu_button.setContentsMargins(0, 5, 0, 0) # top margin
 
-        algo_choice = AlgorithmChoiceWidget(signal=self.configuration_signal)
+        algo_choice = AlgorithmChoiceWidget(signal=self.config_signal)
         gpu_button.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
         algo_panel.layout().addWidget(algo_choice)
@@ -82,8 +93,10 @@ class TrainPlugin(QWidget):
         # add data tabs
         self.data_stck = QStackedWidget()
         self.data_layers = [
-            DataSelectionWidget(self.configuration_signal),
-            DataSelectionWidget(self.configuration_signal, True),
+            DataSelectionWidget(signal=self.config_signal, napari_viewer=self.viewer),
+            DataSelectionWidget(
+                signal=self.config_signal, use_target=True, napari_viewer=self.viewer
+            ),
         ]
         for layer in self.data_layers:
             self.data_stck.addWidget(layer)
@@ -92,18 +105,39 @@ class TrainPlugin(QWidget):
         self.layout().addWidget(self.data_stck)
 
         # add configuration widget
-        self.config_widget = ConfigurationWidget(self.configuration_signal)
+        self.config_widget = ConfigurationWidget(self.config_signal)
         self.layout().addWidget(self.config_widget)
 
         # add train widget
         self.train_widget = TrainingWidget(self.train_signal)
         self.layout().addWidget(self.train_widget)
 
+        # add progress widget
+        self.progress_widget = ProgressWidget(self.train_signal)
+        self.layout().addWidget(self.progress_widget)
 
         # connect signals
-        if self.configuration_signal is not None:
-            self.configuration_signal.events.algorithm.connect(self._set_data_from_algorithm)
-            self._set_data_from_algorithm(self.configuration_signal.algorithm)
+        if self.config_signal is not None:
+            self.config_signal.events.algorithm.connect(self._set_data_from_algorithm)
+            self._set_data_from_algorithm(self.config_signal.algorithm)
+            self.train_signal.events.state.connect(self._training_state_changed)
+
+    def _training_state_changed(self, state: TrainingState) -> None:
+        if state == TrainingState.TRAINING:
+            self.train_worker = train_worker(
+                self.config_signal, 
+                self.train_signal
+            )
+            
+            self.train_worker.yielded.connect(self._register_careamist)
+            self.train_worker.start()
+
+        elif state == TrainingState.STOPPED:
+            if self.careamist is not None:
+                self.careamist.stop_training()
+
+    def _register_careamist(self, careamist: CAREamist) -> None:
+        self.careamist = careamist
             
     def _set_data_from_algorithm(self, name: str) -> None:
         """Set the data selection widget based on the algorithm."""
@@ -119,21 +153,30 @@ class TrainPlugin(QWidget):
 
 
 if __name__ == "__main__":
-    from qtpy.QtWidgets import QApplication
-    import sys
+    # from qtpy.QtWidgets import QApplication
+    # import sys
 
-    # Create a QApplication instance
-    app = QApplication(sys.argv)
+    # # Create a QApplication instance
+    # app = QApplication(sys.argv)
 
-    # Signals
-    myalgo = ConfigurationSignal()
-    mytrain = TrainingStatus()
+    # # Instantiate widget
+    # widget = TrainPluginWrapper()
 
-    # Instantiate widget
-    widget = TrainingWidgetWrapper(myalgo, mytrain)
+    # # Show the widget
+    # widget.show()
 
-    # Show the widget
-    widget.show()
+    # # Run the application event loop
+    # sys.exit(app.exec_())
 
-    # Run the application event loop
-    sys.exit(app.exec_())
+    import napari
+    # create a Viewer
+    viewer = napari.Viewer()
+
+    # add napari-n2v plugin
+    viewer.window.add_dock_widget(TrainPluginWrapper(viewer))
+
+    # add image to napari
+    # viewer.add_image(data[0][0], name=data[0][1]['name'])
+
+    # start UI
+    napari.run()

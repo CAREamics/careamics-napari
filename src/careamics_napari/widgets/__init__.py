@@ -15,3 +15,4 @@ from .data_selection_widget import DataSelectionWidget
 from .configuration_window import AdvancedConfigurationWindow
 from .training_configuration_widget import ConfigurationWidget
 from .training_widget import TrainingWidget
+from .progress_widget import ProgressWidget

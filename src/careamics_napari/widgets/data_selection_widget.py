@@ -205,7 +205,7 @@ if __name__ == "__main__":
 
     # add napari-n2v plugin
     viewer.window.add_dock_widget(DataSelectionWidget(
-        ConfigurationSignal(), False, viewer
+        ConfigurationSignal(), True, viewer
     ))
 
     # add image to napari
