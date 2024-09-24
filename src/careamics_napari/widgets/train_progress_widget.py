@@ -17,6 +17,8 @@ class TrainProgressWidget(QGroupBox):
             self: Self,
             signal: Optional[TrainingStatus] = None
     ) -> None:
+        super().__init__()
+
         self.train_status = signal
 
         self.setTitle("Training progress")
@@ -44,7 +46,7 @@ class TrainProgressWidget(QGroupBox):
 
         # actions
         if self.train_status is not None:
-            self.train_status.events.state.connect(self._update_trainng_state)
+            self.train_status.events.state.connect(self._update_training_state)
 
             self.train_status.events.epoch_idx.connect(self._update_epoch)
             self.train_status.events.max_epochs.connect(self._update_max_epoch)
@@ -52,7 +54,7 @@ class TrainProgressWidget(QGroupBox):
             self.train_status.events.max_batches.connect(self._update_max_batch)
             self.train_status.events.val_loss.connect(self._update_loss)
 
-    def _update_trainng_state(self, state: TrainingState):
+    def _update_training_state(self, state: TrainingState):
         if state == TrainingState.TRAINING:
             self.plot.clear()
 

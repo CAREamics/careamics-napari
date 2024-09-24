@@ -49,6 +49,10 @@ class PredictionWidget(QGroupBox):
         self.setLayout(QVBoxLayout())
         self.layout().setContentsMargins(20, 20, 20, 0)
 
+        # data selection
+        predict_data_widget = PredictDataWidget(self.pred_config_signal)
+        self.layout().addWidget(predict_data_widget)
+        
         # checkbox
         self.tiling_cbox = QCheckBox('Tile prediction')
         self.tiling_cbox.setToolTip(
@@ -61,9 +65,11 @@ class PredictionWidget(QGroupBox):
         self.tile_size_xy = PowerOfTwoSpinBox(
             64, 1024, self.pred_config_signal.tile_size_xy
         )
+        self.tile_size_xy.setToolTip('Tile size in the xy dimension.')
         self.tile_size_xy.setEnabled(False)
 
         self.tile_size_z = PowerOfTwoSpinBox(4, 32, self.pred_config_signal.tile_size_z)
+        self.tile_size_z.setToolTip('Tile size in the z dimension.')
         self.tile_size_z.setEnabled(False)
 
         tiling_form = QFormLayout()
@@ -73,9 +79,6 @@ class PredictionWidget(QGroupBox):
         tiling_widget.setLayout(tiling_form)
         self.layout().addWidget(tiling_widget)
 
-        # data selection
-        predict_data_widget = PredictDataWidget(self.pred_config_signal)
-        self.layout().addWidget(predict_data_widget)
 
         # prediction progress bar
         self.pb_prediction = create_progressbar(

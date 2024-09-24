@@ -20,6 +20,6 @@ from .train_data_widget import TrainDataWidget
 from .configuration_window import AdvancedConfigurationWindow
 from .training_configuration_widget import ConfigurationWidget
 from .training_widget import TrainingWidget
-from .progress_widget import TrainProgressWidget
+from .train_progress_widget import TrainProgressWidget
 from .predict_data_widget import PredictDataWidget
 from .prediction_widget import PredictionWidget

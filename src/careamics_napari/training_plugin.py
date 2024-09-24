@@ -48,6 +48,7 @@ else:
     _has_napari = True
 
 # TODO: add logging to napari
+# TODO add loading of existing model?
 
 class TrainPluginWrapper(ScrollWidgetWrapper):
     def __init__(self: Self, napari_viewer: Optional[napari.Viewer] = None) -> None:
@@ -137,6 +138,7 @@ class TrainPlugin(QWidget):
             self.train_config_signal,
             self.pred_config_signal
         )
+        self.layout().addWidget(self.prediction_widget)
 
         # add saving
         # TODO

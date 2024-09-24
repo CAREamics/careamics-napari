@@ -57,12 +57,14 @@ class ConfigurationWidget(QGroupBox):
 
         # patch size
         self.patch_XY_spin = PowerOfTwoSpinBox(
-            16, 512, 64, tooltip='Dimension of the patches in XY'
+            16, 512, 64
         )
+        self.patch_XY_spin.setToolTip('Dimension of the patches in XY.')
         
         self.patch_Z_spin = PowerOfTwoSpinBox(
-            8, 512, 8, tooltip='Dimension of the patches in Z'
+            8, 512, 8
         )
+        self.patch_Z_spin.setToolTip('Dimension of the patches in Z.')
 
         formLayout = QFormLayout()
         formLayout.addRow('Enable 3D', self.enable_3d)
