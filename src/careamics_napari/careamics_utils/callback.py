@@ -16,7 +16,7 @@ class UpdaterCallBack(Callback):
         self.queue.put(
             Update(
                 UpdateType.MAX_BATCH,
-                len(trainer.train_dataloader) / trainer.accumulate_grad_batches
+                int(len(trainer.train_dataloader) / trainer.accumulate_grad_batches)
             )
         )
 
@@ -27,14 +27,6 @@ class UpdaterCallBack(Callback):
                 trainer.max_epochs
             )
         )
-
-    # def on_train_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
-    #     self.queue.put(
-    #         Update(
-    #             UpdateType.STATE,
-    #             TrainingState.DONE
-    #         )
-    #     )
 
     def on_train_epoch_start(
         self, trainer: Trainer, pl_module: LightningModule

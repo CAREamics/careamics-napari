@@ -2,9 +2,7 @@
 from typing import Generator, Optional
 from queue import Queue
 from threading import Thread
-import time
 
-import napari
 from napari.qt.threading import thread_worker
 import napari.utils.notifications as ntf
 
@@ -17,7 +15,7 @@ from careamics_napari.signals import (
     Update,
     UpdateType,
     TrainingState, 
-    ConfigurationSignal
+    TrainConfigurationSignal
 )
 
 
@@ -26,8 +24,7 @@ from careamics_napari.signals import (
 # TODO pass careamist here if it already exists?
 @thread_worker
 def train_worker(
-    config_signal: ConfigurationSignal,
-    napari_viewer: Optional[napari.Viewer] = None,
+    config_signal: TrainConfigurationSignal,
     careamist: Optional[CAREamist] = None,
 ) -> Generator[Update, None, None]:
 
@@ -40,7 +37,6 @@ def train_worker(
         args=(
             config_signal, 
             update_queue,
-            napari_viewer, 
             careamist,
         )
     )
@@ -49,23 +45,20 @@ def train_worker(
     # loop looking for update events
     while True:
         update: Update = update_queue.get(block=True)
+        yield update
 
-        if update.type == UpdateType.STATE and update.value == TrainingState.DONE:
-            yield update
+        if (
+            (update.type == UpdateType.STATE and update.value == TrainingState.DONE)
+            or (update.type == UpdateType.EXCEPTION)
+        ):
             break
-        elif update.type == UpdateType.EXCEPTION:
-            yield update
-            break
-        else:
-            yield update
 
 def _push_exception(queue: Queue, e: Exception) -> None:
     queue.put(Update(UpdateType.EXCEPTION, e))
 
 def _train(
-        config_signal: ConfigurationSignal, 
+        config_signal: TrainConfigurationSignal, 
         update_queue: Queue, 
-        napari_viewer: Optional[napari.Viewer] = None,
         careamist: Optional[CAREamist] = None
 ) -> None:
     

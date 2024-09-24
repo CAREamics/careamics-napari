@@ -8,13 +8,13 @@ from qtpy.QtWidgets import (
     QFormLayout,
     QTabWidget,
 )
+from magicgui.widgets import Container
 
 from careamics_napari.widgets import (
     FolderWidget,
-    two_layers_choice,
-    four_layers_choice
+    layer_choice
 )
-from careamics_napari.signals import ConfigurationSignal
+from careamics_napari.signals import TrainConfigurationSignal
 
 if TYPE_CHECKING:
     import napari
@@ -30,15 +30,14 @@ else:
     _has_napari = True
 
 
-class DataSelectionWidget(QTabWidget):
+class TrainDataWidget(QTabWidget):
     """A widget offering to select layers from napari or paths from disk.
     """
 
     def __init__(
             self: Self, 
-            signal: Optional[ConfigurationSignal] = None,
+            signal: Optional[TrainConfigurationSignal] = None,
             use_target: bool = False, 
-            napari_viewer: Optional[napari.Viewer] = None
     ) -> None:
         """Constructor.
 
@@ -66,8 +65,10 @@ class DataSelectionWidget(QTabWidget):
         self.setTabToolTip(1, 'Use patches saved on the disk')
 
         # set tabs
-        self._set_layer_tab(layer_tab, napari_viewer)
+        self._set_layer_tab(layer_tab)
         self._set_disk_tab(disk_tab)
+
+        self.setMaximumHeight(maxh=400 if self.use_target else 200)
 
         # set actions
         if self.config_signal is not None:
@@ -77,33 +78,37 @@ class DataSelectionWidget(QTabWidget):
     def _set_layer_tab(
             self, 
             layer_tab: QWidget, 
-            napari_viewer: Optional[napari.Viewer]
     ) -> None:
+        if _has_napari and napari.current_viewer() is not None:
 
-        if self.use_target:
-            self.setMaximumHeight(400)
-        else:
-            self.setMaximumHeight(200)
+            self.img_train = layer_choice(
+                name="Train", annotation=Image
+            )
+            self.img_train.native.setToolTip('Select a training layer.')
 
+            self.img_val = layer_choice(
+                name="Val", annotation=Image
+            )
+            self.img_train.native.setToolTip('Select a validation layer.')
 
-        if _has_napari and napari_viewer is not None:
+            # connection actions for images
+            self.img_train.changed.connect(self._update_train_layer)
+            self.img_val.changed.connect(self._update_val_layer)
 
             if self.use_target:
-                layer_choice = four_layers_choice()
-
-                # get the layers
-                self.img_train = layer_choice.Train
-                self.target_train = layer_choice.TrainTarget
-                self.img_val = layer_choice.Val
-                self.target_val = layer_choice.ValTarget
+                # get the target layers
+                self.target_train = layer_choice(
+                    name="Train target", annotation=Image
+                )
+                self.target_val = layer_choice(
+                    name="Val target", annotation=Image
+                )
 
                 # tool tips
-                self.img_train.native.setToolTip('Select a training layer.')
                 self.target_train.native.setToolTip(
                     'Select a training target layer.'
                 )
 
-                self.img_train.native.setToolTip('Select a training layer.')
                 self.target_val.native.setToolTip(
                     'Select a validation target layer.'
                 )
@@ -112,29 +117,21 @@ class DataSelectionWidget(QTabWidget):
                 self.target_train.changed.connect(self._update_train_target_layer)
                 self.target_val.changed.connect(self._update_val_target_layer)
 
-            else:
-                layer_choice = two_layers_choice()
-
-                # get the layers
-                self.img_train = layer_choice.Train
-                self.img_val = layer_choice.Val
-
-                self.img_train.native.setToolTip('Select a training layer.')
-                self.img_val.native.setToolTip(
-                    'Select a validation layer (can\n'
-                    'be the same as for training, in\n'
-                    'which case validation patches will\n'
-                    'be extracted from the training data).'
+                layer_selector = Container(widgets=[
+                        self.img_train, 
+                        self.target_train,
+                        self.img_val,
+                        self.target_val
+                    ]
                 )
 
-            # connection actions for images
-            self.img_train.changed.connect(self._update_train_layer)
-            self.img_val.changed.connect(self._update_val_layer)
-
+            else:
+                layer_selector = Container(widgets=[self.img_train, self.img_val])
             
-            layer_tab.layout().addWidget(layer_choice.native)
+            layer_tab.layout().addWidget(layer_selector.native)
 
         else:
+            # simply remove the tab
             self.removeTab(0)
 
     def _set_disk_tab(self, disk_tab: QWidget) -> None:
@@ -194,9 +191,12 @@ class DataSelectionWidget(QTabWidget):
             )
 
         # add actions
-        self.train_images_folder.get_text_widget().textChanged.connect(self._update_train_folder)
-        self.val_images_folder.get_text_widget().textChanged.connect(self._update_val_folder)
-
+        self.train_images_folder.get_text_widget().textChanged.connect(
+            self._update_train_folder
+        )
+        self.val_images_folder.get_text_widget().textChanged.connect(
+            self._update_val_folder
+        )
 
         buttons.setLayout(form)
         disk_tab.layout().addWidget(buttons)
@@ -254,8 +254,8 @@ if __name__ == "__main__":
     viewer = napari.Viewer()
 
     # add napari-n2v plugin
-    viewer.window.add_dock_widget(DataSelectionWidget(
-        ConfigurationSignal(), True, viewer
+    viewer.window.add_dock_widget(TrainDataWidget(
+        TrainConfigurationSignal(), True, viewer
     ))
 
     # add image to napari

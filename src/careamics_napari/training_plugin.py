@@ -15,14 +15,14 @@ from careamics_napari.widgets import (
     CAREamicsBanner,
     create_gpu_label,
     AlgorithmChoiceWidget,
-    DataSelectionWidget,
+    TrainDataWidget,
     ScrollWidgetWrapper,
     ConfigurationWidget,
     TrainingWidget,
     ProgressWidget
 )
 from careamics_napari.signals import (
-    ConfigurationSignal, 
+    TrainConfigurationSignal, 
     TrainingStatus, 
     TrainingState,
     Update,
@@ -57,7 +57,7 @@ class TrainPlugin(QWidget):
         self.careamist = None
 
         # create signals
-        self.config_signal = ConfigurationSignal()
+        self.config_signal = TrainConfigurationSignal()
         self.train_signal = TrainingStatus()
 
         self.init_ui()
@@ -98,9 +98,9 @@ class TrainPlugin(QWidget):
         # add data tabs
         self.data_stck = QStackedWidget()
         self.data_layers = [
-            DataSelectionWidget(signal=self.config_signal, napari_viewer=self.viewer),
-            DataSelectionWidget(
-                signal=self.config_signal, use_target=True, napari_viewer=self.viewer
+            TrainDataWidget(signal=self.config_signal),
+            TrainDataWidget(
+                signal=self.config_signal, use_target=True
             ),
         ]
         for layer in self.data_layers:
@@ -147,10 +147,12 @@ class TrainPlugin(QWidget):
 
         elif state == TrainingState.CRASHED:
             if self.careamist is not None:
+                del self.careamist # attempt to free resources
                 self.careamist = None
 
     def _update(self, update: Update) -> None:
         """Update the signal from the training worker."""
+        print(f"Received update of type {update.type} with value {update.value}")
         if update.type == UpdateType.CAREAMIST:
             self.careamist = update.value
         elif update.type == UpdateType.DEBUG:
@@ -163,7 +165,6 @@ class TrainPlugin(QWidget):
             
     def _set_data_from_algorithm(self, name: str) -> None:
         """Set the data selection widget based on the algorithm."""
-        print(name)
         if (
             name == SupportedAlgorithm.CARE.value
             or name == SupportedAlgorithm.N2N.value
