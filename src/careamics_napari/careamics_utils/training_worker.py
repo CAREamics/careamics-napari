@@ -105,6 +105,9 @@ def _train(
         train_data = config_signal.path_train
         val_data = config_signal.path_val if config_signal.path_val != "" else None
 
+        if train_data == val_data:
+            val_data = None
+
         if config_signal.algorithm != SupportedAlgorithm.N2V:
             if config_signal.path_train_target == "":
                 _push_exception(
@@ -116,11 +119,13 @@ def _train(
                 return
 
             train_data_target = config_signal.path_train_target
-            val_data_target = (
-                config_signal.path_val_target 
-                if config_signal.path_val_target != "" 
-                else None
-            )
+
+            if val_data is not None:
+                val_data_target = (
+                    config_signal.path_val_target 
+                    if config_signal.path_val_target != "" 
+                    else None
+                )
 
     else:
         if config_signal.layer_train is None:
@@ -138,6 +143,9 @@ def _train(
             else None
         )
 
+        if train_data == val_data:
+            val_data = None
+
         if config_signal.algorithm != SupportedAlgorithm.N2V:
 
             if config_signal.layer_train_target is None:
@@ -150,11 +158,13 @@ def _train(
                 return
 
             train_data_target = config_signal.layer_train_target.data
-            val_data_target = (
-                config_signal.layer_val_target.data
-                if config_signal.layer_val_target is not None 
-                else None
-            )
+
+            if val_data is not None:
+                val_data_target = (
+                    config_signal.layer_val_target.data
+                    if config_signal.layer_val_target is not None 
+                    else None
+                )
 
     # TODO add val percentage and val minimum
     # Train CAREamist

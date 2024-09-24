@@ -7,7 +7,12 @@ from .gpu_widget import create_gpu_label
 from .magicgui_widgets import (
     layer_choice, load_button
 )
-from .qt_widgets import create_double_spinbox, create_int_spinbox, create_progressbar
+from .qt_widgets import (
+    create_double_spinbox, 
+    create_int_spinbox, 
+    create_progressbar,
+    PowerOfTwoSpinBox
+)
 from .scroll_wrapper import ScrollWidgetWrapper
 from .tbplot_widget import TBPlotWidget
 from .algorithm_choice import AlgorithmChoiceWidget

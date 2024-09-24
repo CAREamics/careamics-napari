@@ -65,16 +65,21 @@ class AdvancedConfigurationWindow(QDialog):
             "Check to add augmentation that flips the image\n"
             "along the x-axis"
         )
+        self.x_flip.setChecked(self.configuration_signal.x_flip)
+
         self.y_flip = QCheckBox("Y Flip")
         self.y_flip.setToolTip(
             "Check to add augmentation that flips the image\n"
             "along the y-axis"
         )
+        self.y_flip.setChecked(self.configuration_signal.y_flip)
+
         self.rotations = QCheckBox("90 Rotations")
         self.rotations.setToolTip(
             "Check to add augmentation that rotates the image\n"
             "in 90 degree increments in XY"
         )
+        self.rotations.setChecked(self.configuration_signal.rotations)
         
         augmentations_layout.addRow(self.x_flip)
         augmentations_layout.addRow(self.y_flip)
@@ -95,6 +100,9 @@ class AdvancedConfigurationWindow(QDialog):
             "Check to treat the channels independently during\n"
             "training."
         )
+        self.independent_channels.setChecked(
+            self.configuration_signal.independent_channels
+        )
 
         ind_channels_layout.addRow(self.independent_channels)
         ind_channels_widget.setLayout(ind_channels_layout)
@@ -103,7 +111,9 @@ class AdvancedConfigurationWindow(QDialog):
         n2v_channels_widget = QWidget()
         n2v_channels_widget_layout = QFormLayout()
 
-        self.n_channels = create_int_spinbox(1, 10, 1, 1)
+        self.n_channels = create_int_spinbox(
+            1, 10, self.configuration_signal.n_channels_n2v, 1
+        )
         self.n_channels.setToolTip(
             "Number of channels in the input images"
         )
@@ -115,8 +125,12 @@ class AdvancedConfigurationWindow(QDialog):
         care_channels_widget = QWidget()
         care_channels_widget_layout = QFormLayout()
 
-        self.n_channels_in = create_int_spinbox(1, 10, 1, 1)
-        self.n_channels_out = create_int_spinbox(1, 10, 1, 1)
+        self.n_channels_in = create_int_spinbox(
+            1, 10, self.configuration_signal.n_channels_in_care, 1
+        )
+        self.n_channels_out = create_int_spinbox(
+            1, 10, self.configuration_signal.n_channels_out_care, 1
+        )
         
         care_channels_widget_layout.addRow("Channels in", self.n_channels_in)
         care_channels_widget_layout.addRow("Channels out", self.n_channels_out)
@@ -141,6 +155,7 @@ class AdvancedConfigurationWindow(QDialog):
         self.use_n2v2.setToolTip(
             "Check to use N2V2 for training."
         )
+        self.use_n2v2.setChecked(self.configuration_signal.use_n2v2)
 
         n2v2_layout.addRow(self.use_n2v2)
         self.n2v2_widget.setLayout(n2v2_layout)
@@ -151,11 +166,15 @@ class AdvancedConfigurationWindow(QDialog):
         model_params = QGroupBox("UNet parameters")
         model_params_layout = QFormLayout()
 
-        self.model_depth = create_int_spinbox(2, 5, 2, 1)
+        self.model_depth = create_int_spinbox(
+            2, 5, self.configuration_signal.depth, 1
+        )
         self.model_depth.setToolTip(
             "Depth of the U-Net model."
         )
-        self.size_conv_filters = create_int_spinbox(8, 1024, 32, 8, 8)
+        self.size_conv_filters = create_int_spinbox(
+            8, 1024, self.configuration_signal.size_conv_filters, 8, 8
+        )
         self.size_conv_filters.setToolTip(
             "Number of convolutional filters in the first layer."
         )

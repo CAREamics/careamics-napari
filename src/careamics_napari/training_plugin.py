@@ -147,7 +147,7 @@ class TrainPlugin(QWidget):
 
         elif state == TrainingState.CRASHED or state == TrainingState.IDLE:
             if self.careamist is not None:
-                del self.careamist # attempt to free resources
+                del self.careamist
                 self.careamist = None
 
     def _update(self, update: Update) -> None:

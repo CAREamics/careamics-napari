@@ -15,6 +15,43 @@ class DoubleSpinBox(QDoubleSpinBox):
         event.ignore()
 
 
+class PowerOfTwoSpinBox(QSpinBox):
+    def __init__(self, min_val: int, max_val: int, default: int, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # min or max are not power of 2
+        if min_val & (min_val - 1) != 0:
+            raise ValueError(f"Minimum value must be a power of 2, got {min_val}.")
+        
+        if max_val & (max_val - 1) != 0:
+            raise ValueError(f"Maximum value must be a power of 2, got {max_val}.")
+
+        self.setRange(min_val, max_val) 
+        self.setSingleStep(1)  
+        self.setValue(default)
+
+    def stepBy(self, steps):
+        current_value = self.value()
+        current_power = self._get_power_of_two(current_value)
+        
+        # Step up or down by adjusting the power of two
+        new_power = current_power + steps
+        new_value = 2 ** new_power
+        self.setValue(new_value)
+
+    def _get_power_of_two(self, value):
+        power = 0
+        while 2 ** power < value:
+            power += 1
+        return power
+
+    def textFromValue(self, value):
+        return str(value)
+
+    def valueFromText(self, text):
+        return int(text)
+
+
 def create_double_spinbox(
     min_value: float = 0,
     max_value: float = 1,

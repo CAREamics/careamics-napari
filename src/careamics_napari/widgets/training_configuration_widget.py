@@ -18,7 +18,8 @@ from careamics_napari.resources import ICON_GEAR
 from careamics_napari.widgets import (
     AxesWidget,
     create_int_spinbox,
-    AdvancedConfigurationWindow
+    AdvancedConfigurationWindow,
+    PowerOfTwoSpinBox
 )
 
 
@@ -42,7 +43,6 @@ class ConfigurationWidget(QGroupBox):
         # 3D checkbox
         self.enable_3d = QCheckBox()
         self.enable_3d.setToolTip('Use a 3D network')
-        self.patch_Z_spin = create_int_spinbox(16, 512, 16, 8, False, tooltip='Dimension of the patches in Z')
 
         # axes
         self.axes_widget = AxesWidget(signal=signal)
@@ -56,7 +56,13 @@ class ConfigurationWidget(QGroupBox):
         self.batch_size_spin.setToolTip('Number of patches per batch (decrease if GPU memory is insufficient)')
 
         # patch size
-        self.patch_XY_spin = create_int_spinbox(16, 512, 64, 8, tooltip='Dimension of the patches in XY')
+        self.patch_XY_spin = PowerOfTwoSpinBox(
+            16, 512, 64, tooltip='Dimension of the patches in XY'
+        )
+        
+        self.patch_Z_spin = PowerOfTwoSpinBox(
+            8, 512, 8, tooltip='Dimension of the patches in Z'
+        )
 
         formLayout = QFormLayout()
         formLayout.addRow('Enable 3D', self.enable_3d)
