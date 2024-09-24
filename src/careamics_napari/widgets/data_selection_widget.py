@@ -18,10 +18,12 @@ from careamics_napari.signals import ConfigurationSignal
 
 if TYPE_CHECKING:
     import napari
+    from napari.layers import Image
 
 # at run time
 try:
     import napari
+    from napari.layers import Image
 except ImportError:
     _has_napari = False
 else:
@@ -29,7 +31,7 @@ else:
 
 
 class DataSelectionWidget(QTabWidget):
-    """A widget offering the select layers from napari or paths from disk.
+    """A widget offering to select layers from napari or paths from disk.
     """
 
     def __init__(
@@ -48,7 +50,7 @@ class DataSelectionWidget(QTabWidget):
             Napari viewer.
         """
         super().__init__()
-        self.signal = signal
+        self.config_signal = signal
         self.use_target = use_target
             
         # QTabs
@@ -68,8 +70,9 @@ class DataSelectionWidget(QTabWidget):
         self._set_disk_tab(disk_tab)
 
         # set actions
-        if self.signal is not None:
+        if self.config_signal is not None:
             self.currentChanged.connect(self._set_data_source)
+            self._set_data_source(self.currentIndex())
 
     def _set_layer_tab(
             self, 
@@ -89,39 +92,48 @@ class DataSelectionWidget(QTabWidget):
                 layer_choice = four_layers_choice()
 
                 # get the layers
-                img_train = layer_choice.Train
-                target_train = layer_choice.TrainTarget
-                img_val = layer_choice.Val
-                target_val = layer_choice.ValTarget
+                self.img_train = layer_choice.Train
+                self.target_train = layer_choice.TrainTarget
+                self.img_val = layer_choice.Val
+                self.target_val = layer_choice.ValTarget
 
                 # tool tips
-                img_train.native.setToolTip('Select a training layer.')
-                target_train.native.setToolTip(
+                self.img_train.native.setToolTip('Select a training layer.')
+                self.target_train.native.setToolTip(
                     'Select a training target layer.'
                 )
 
-                img_train.native.setToolTip('Select a training layer.')
-                target_val.native.setToolTip(
+                self.img_train.native.setToolTip('Select a training layer.')
+                self.target_val.native.setToolTip(
                     'Select a validation target layer.'
                 )
+
+                # connection actions for targets
+                self.target_train.changed.connect(self._update_train_target_layer)
+                self.target_val.changed.connect(self._update_val_target_layer)
 
             else:
                 layer_choice = two_layers_choice()
 
                 # get the layers
-                img_train = layer_choice.Train
-                img_val = layer_choice.Val
+                self.img_train = layer_choice.Train
+                self.img_val = layer_choice.Val
 
-                img_train.native.setToolTip('Select a training layer.')
-                img_val.native.setToolTip(
+                self.img_train.native.setToolTip('Select a training layer.')
+                self.img_val.native.setToolTip(
                     'Select a validation layer (can\n'
                     'be the same as for training, in\n'
                     'which case validation patches will\n'
                     'be extracted from the training data).'
                 )
 
+            # connection actions for images
+            self.img_train.changed.connect(self._update_train_layer)
+            self.img_val.changed.connect(self._update_val_layer)
+
             
             layer_tab.layout().addWidget(layer_choice.native)
+
         else:
             self.removeTab(0)
 
@@ -132,52 +144,90 @@ class DataSelectionWidget(QTabWidget):
         # form.setContentsMargins(4, 0, 4, 0)
         # form.setSpacing(0)
 
-        train_images_folder = FolderWidget('Choose')
-        val_images_folder = FolderWidget('Choose')
-        form.addRow('Train', train_images_folder)
-        form.addRow('Val', val_images_folder)
+        self.train_images_folder = FolderWidget('Choose')
+        self.val_images_folder = FolderWidget('Choose')
+        form.addRow('Train', self.train_images_folder)
+        form.addRow('Val', self.val_images_folder)
 
         if self.use_target:
-            train_target_folder = FolderWidget('Choose')
-            val_target_folder = FolderWidget('Choose')
+            self.train_target_folder = FolderWidget('Choose')
+            self.val_target_folder = FolderWidget('Choose')
 
-            form.addRow('Train target', train_target_folder)
-            form.addRow('Val target', val_target_folder)
+            form.addRow('Train target', self.train_target_folder)
+            form.addRow('Val target', self.val_target_folder)
 
-            train_target_folder.setToolTip(
+            self.train_target_folder.setToolTip(
                 'Select a folder containing the training\n'
                 'target.'
             )
-            val_target_folder.setToolTip(
+            self.val_target_folder.setToolTip(
                 'Select a folder containing the validation\n'
                 'target.'
             )
-            train_images_folder.setToolTip(
+            self.train_images_folder.setToolTip(
                 'Select a folder containing the training\n'
                 'images.'
             )
-            val_images_folder.setToolTip(
+            self.val_images_folder.setToolTip(
                 'Select a folder containing the validation\n'
                 'images.'
             )
+
+            # add actions to target
+            self.train_target_folder.get_text_widget().textChanged.connect(
+                self._update_train_target_folder
+            )
+            self.val_target_folder.get_text_widget().textChanged.connect(
+                self._update_val_target_folder
+            )
+
         else:
-            train_images_folder.setToolTip(
+            self.train_images_folder.setToolTip(
                 'Select a folder containing the training\n'
                 'images.'
             )
-            val_images_folder.setToolTip(
+            self.val_images_folder.setToolTip(
                 'Select a folder containing the validation\n'
                 'images, if you select the same folder as\n'
                 'for training, the validation patches will\n'
                 'be extracted from the training data.'
             )
 
+        # add actions
+        self.train_images_folder.get_text_widget().textChanged.connect(self._update_train_folder)
+        self.val_images_folder.get_text_widget().textChanged.connect(self._update_val_folder)
+
+
         buttons.setLayout(form)
         disk_tab.layout().addWidget(buttons)
 
     def _set_data_source(self, index: int) -> None:
-        if self.signal is not None:
-            self.signal.load_from_disk = index == self.count() - 1
+        if self.config_signal is not None:
+            self.config_signal.load_from_disk = index == self.count() - 1
+
+    def _update_train_layer(self, layer: Image) -> None:
+        self.config_signal.layer_train = layer
+    
+    def _update_val_layer(self, layer: Image) -> None:
+        self.config_signal.layer_val = layer
+
+    def _update_train_target_layer(self, layer: Image) -> None:
+        self.config_signal.layer_train_target = layer
+    
+    def _update_val_target_layer(self, layer: Image) -> None:
+        self.config_signal.layer_val_target = layer
+
+    def _update_train_folder(self, folder: str) -> None:
+        self.config_signal.path_train = folder
+
+    def _update_val_folder(self, folder: str) -> None:
+        self.config_signal.path_val = folder
+    
+    def _update_train_target_folder(self, folder: str) -> None:
+        self.config_signal.path_train_target = folder
+    
+    def _update_val_target_folder(self, folder: str) -> None:
+        self.config_signal.path_val_target = folder
 
 
 if __name__ == "__main__":

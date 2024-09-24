@@ -4,6 +4,8 @@ from typing import TYPE_CHECKING, Optional, Union
 
 from psygnal import evented
 
+from careamics import CAREamist
+
 if TYPE_CHECKING:
     from psygnal import SignalGroup, SignalInstance
 
@@ -25,6 +27,9 @@ class UpdateType(str, Enum):
     LOSS = "loss"
     VAL_LOSS = "val_loss"
     STATE = "state"
+    CAREAMIST = "careamist"
+    DEBUG = "debug"
+    EXCEPTION = "exception"
 
 
 class TrainingState(IntEnum):
@@ -33,6 +38,7 @@ class TrainingState(IntEnum):
     DONE = 2
     STOPPED = 3
     CRASHED = 4
+
 
 @dataclass
 class Stopper:
@@ -43,12 +49,16 @@ class Stopper:
 class Update:
 
     type: UpdateType
-    value: Optional[Union[int, float, TrainingState]] = None
+    value: Optional[Union[int, float, str, TrainingState, CAREamist, Exception]] = None
 
 
 @evented
 @dataclass
 class TrainingStatus:
+    """Dataclass used to update the training UI with the current status and progress
+    of the training process.
+    """
+
     if TYPE_CHECKING:
         events: TrainingStatusSignalGroup
 
@@ -61,4 +71,9 @@ class TrainingStatus:
     state: TrainingState = TrainingState.IDLE
 
     def update(self, new_update: Update) -> None:
-        setattr(self, new_update.type.value, new_update.value)
+        if (
+            new_update.type != UpdateType.CAREAMIST
+            and new_update.type != UpdateType.EXCEPTION
+            and new_update.type != UpdateType.DEBUG
+        ):
+            setattr(self, new_update.type.value, new_update.value)

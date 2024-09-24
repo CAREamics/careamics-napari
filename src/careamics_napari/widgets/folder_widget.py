@@ -31,3 +31,6 @@ class FolderWidget(QWidget):
 
     def get_folder(self):
         return self.text_field.text()
+    
+    def get_text_widget(self) -> QLineEdit:
+        return self.text_field

@@ -3,6 +3,9 @@ from psygnal import evented
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+# TODO can we avoid this import to make it napari-independent?
+from napari.layers import Image
+
 if TYPE_CHECKING:
     from psygnal import SignalGroup, SignalInstance
 
@@ -27,10 +30,10 @@ class ConfigurationSignal:
 
     # parameters set by widgets
     load_from_disk: bool = True
-    layer_train: str = ""
-    layer_train_target: str = ""
-    layer_val: str = ""
-    layer_val_target: str = ""
+    layer_train: Image = None
+    layer_train_target: Image = None
+    layer_val: Image = None
+    layer_val_target: Image = None
     path_train: str = ""
     path_train_target: str = ""
     path_val: str = ""

@@ -10,7 +10,6 @@ from qtpy.QtWidgets import (
     QStackedWidget 
 )
 
-from careamics import CAREamist
 from careamics.config.support import SupportedAlgorithm
 from careamics_napari.widgets import (
     CAREamicsBanner,
@@ -27,7 +26,7 @@ from careamics_napari.signals import (
     TrainingStatus, 
     TrainingState,
     Update,
-    Stopper
+    UpdateType
 )
 from careamics_napari.careamics_utils.training_worker import train_worker
 
@@ -60,7 +59,6 @@ class TrainPlugin(QWidget):
         # create signals
         self.config_signal = ConfigurationSignal()
         self.train_signal = TrainingStatus()
-        self.stopper = Stopper()
 
         self.init_ui()
 
@@ -134,23 +132,34 @@ class TrainPlugin(QWidget):
 
     def _training_state_changed(self, state: TrainingState) -> None:
         if state == TrainingState.TRAINING:
-            self.stopper.stop = False
             self.train_worker = train_worker(
                 self.config_signal,
-                self.stopper
+                self.viewer,
+                self.careamist
             )
             
             self.train_worker.yielded.connect(self._update)
             self.train_worker.start()
 
         elif state == TrainingState.STOPPED:
-            self.stopper.stop = True
-        #     if self.careamist is not None:
-        #         self.careamist.stop_training()
+            if self.careamist is not None:
+                self.careamist.stop_training()
+
+        elif state == TrainingState.CRASHED:
+            if self.careamist is not None:
+                self.careamist = None
 
     def _update(self, update: Update) -> None:
         """Update the signal from the training worker."""
-        self.train_signal.update(update)
+        if update.type == UpdateType.CAREAMIST:
+            self.careamist = update.value
+        elif update.type == UpdateType.DEBUG:
+            print(update.value)
+        elif update.type == UpdateType.EXCEPTION:
+            self.train_signal.state = TrainingState.CRASHED
+            raise update.value
+        else:
+            self.train_signal.update(update)
             
     def _set_data_from_algorithm(self, name: str) -> None:
         """Set the data selection widget based on the algorithm."""

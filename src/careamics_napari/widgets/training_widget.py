@@ -64,7 +64,9 @@ class TrainingWidget(QGroupBox):
 
             elif self.train_status.state == TrainingState.TRAINING:
                 self.train_status.state = TrainingState.STOPPED
-                self.train_button.setText('Resume')
+                self.train_button.setText('Train')
+                self.reset_model_button.setEnabled(True)
+                self.reset_model_button.setText("Reset")
 
             elif self.train_status.state == TrainingState.STOPPED:
                 self.train_status.state = TrainingState.TRAINING
@@ -83,12 +85,13 @@ class TrainingWidget(QGroupBox):
     def _update_button(self, new_state: TrainingState):
         if (
             new_state == TrainingState.DONE 
-            or new_state == TrainingState.CRASHED
             or new_state == TrainingState.STOPPED
         ):
             self.train_button.setText('Train')
             self.reset_model_button.setEnabled(True)
             self.reset_model_button.setText("Reset")
+        elif new_state == TrainingState.CRASHED:
+            self._reset_clicked()
 
 
 if __name__ == "__main__":

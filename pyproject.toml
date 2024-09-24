@@ -23,6 +23,7 @@ dependencies = [
     'pyqtgraph',
     'napari',
     'careamics[tensorboard]',
+    'careamics-portfolio',
 ]
 
 [project.optional-dependencies]
