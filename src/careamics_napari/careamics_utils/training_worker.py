@@ -42,9 +42,10 @@ def train_worker(
     )
     training.start()
 
-    # loop looking for update events
+    # look for updates
     while True:
         update: Update = update_queue.get(block=True)
+        
         yield update
 
         if (

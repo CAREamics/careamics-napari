@@ -68,7 +68,7 @@ class TrainDataWidget(QTabWidget):
         self._set_layer_tab(layer_tab)
         self._set_disk_tab(disk_tab)
 
-        self.setMaximumHeight(maxh=400 if self.use_target else 200)
+        # self.setMaximumHeight(400 if self.use_target else 200)
 
         # set actions
         if self.config_signal is not None:

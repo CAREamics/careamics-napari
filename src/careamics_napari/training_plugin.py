@@ -28,7 +28,7 @@ from careamics_napari.signals import (
     Update,
     UpdateType
 )
-from careamics_napari.careamics_utils.training_worker import train_worker
+from careamics_napari.careamics_utils import train_worker, free_memory
 
 if TYPE_CHECKING:
     import napari
@@ -41,6 +41,7 @@ except ImportError:
 else:
     _has_napari = True
 
+# TODO: add logging to napari
 
 class TrainPluginWrapper(ScrollWidgetWrapper):
     def __init__(self: Self, napari_viewer: Optional[napari.Viewer] = None) -> None:
@@ -134,7 +135,6 @@ class TrainPlugin(QWidget):
         if state == TrainingState.TRAINING:
             self.train_worker = train_worker(
                 self.config_signal,
-                self.viewer,
                 self.careamist
             )
             
@@ -145,14 +145,13 @@ class TrainPlugin(QWidget):
             if self.careamist is not None:
                 self.careamist.stop_training()
 
-        elif state == TrainingState.CRASHED:
+        elif state == TrainingState.CRASHED or state == TrainingState.IDLE:
             if self.careamist is not None:
                 del self.careamist # attempt to free resources
                 self.careamist = None
 
     def _update(self, update: Update) -> None:
         """Update the signal from the training worker."""
-        print(f"Received update of type {update.type} with value {update.value}")
         if update.type == UpdateType.CAREAMIST:
             self.careamist = update.value
         elif update.type == UpdateType.DEBUG:

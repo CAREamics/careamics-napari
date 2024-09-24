@@ -77,6 +77,11 @@ class ConfigurationWidget(QGroupBox):
         # set actions
         self.training_expert_btn.clicked.connect(self._show_configuration_window)
         self.enable_3d.clicked.connect(self._enable_3d_changed)
+        self.axes_widget.text_field.textChanged.connect(self._update_axes)
+        self.n_epochs_spin.valueChanged.connect(self._update_n_epochs)
+        self.batch_size_spin.valueChanged.connect(self._update_batch_size)
+        self.patch_XY_spin.valueChanged.connect(self._update_patch_size_XY)
+        self.patch_Z_spin.valueChanged.connect(self._update_patch_size_Z)
 
     def _show_configuration_window(self):
         if self.config_window is None or self.config_window.isHidden():
@@ -91,6 +96,26 @@ class ConfigurationWidget(QGroupBox):
         
         if self.configuration_signal is not None:
             self.configuration_signal.is_3d = state
+
+    def _update_axes(self: Self, axes: str) -> None:
+        if self.configuration_signal is not None:
+            self.configuration_signal.axes = axes
+
+    def _update_n_epochs(self: Self, n_epochs: int) -> None:
+        if self.configuration_signal is not None:
+            self.configuration_signal.n_epochs = n_epochs
+
+    def _update_batch_size(self: Self, batch_size: int) -> None:
+        if self.configuration_signal is not None:
+            self.configuration_signal.batch_size = batch_size
+
+    def _update_patch_size_XY(self: Self, patch_size: int) -> None:
+        if self.configuration_signal is not None:
+            self.configuration_signal.patch_size_xy = patch_size
+    
+    def _update_patch_size_Z(self: Self, patch_size: int) -> None:
+        if self.configuration_signal is not None:
+            self.configuration_signal.patch_size_z = patch_size
 
 if __name__ == "__main__":
     from qtpy.QtWidgets import QApplication
