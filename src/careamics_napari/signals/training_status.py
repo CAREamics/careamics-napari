@@ -19,7 +19,7 @@ if TYPE_CHECKING:
         state: SignalInstance
 
 
-class UpdateType(str, Enum):
+class TrainUpdateType(str, Enum):
     MAX_EPOCH = "max_epochs"
     EPOCH = "epoch_idx"
     MAX_BATCH = "max_batches"
@@ -41,14 +41,11 @@ class TrainingState(IntEnum):
 
 
 @dataclass
-class Stopper:
-    stop: bool = False
+class TrainUpdate:
 
+    type: TrainUpdateType
 
-@dataclass
-class Update:
-
-    type: UpdateType
+    # TODO should we split into subclasses to make the value type more specific?
     value: Optional[Union[int, float, str, TrainingState, CAREamist, Exception]] = None
 
 
@@ -70,10 +67,10 @@ class TrainingStatus:
     val_loss: float = -1
     state: TrainingState = TrainingState.IDLE
 
-    def update(self, new_update: Update) -> None:
+    def update(self, new_update: TrainUpdate) -> None:
         if (
-            new_update.type != UpdateType.CAREAMIST
-            and new_update.type != UpdateType.EXCEPTION
-            and new_update.type != UpdateType.DEBUG
+            new_update.type != TrainUpdateType.CAREAMIST
+            and new_update.type != TrainUpdateType.EXCEPTION
+            and new_update.type != TrainUpdateType.DEBUG
         ):
             setattr(self, new_update.type.value, new_update.value)

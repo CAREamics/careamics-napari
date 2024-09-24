@@ -67,3 +67,19 @@ class TrainConfigurationSignal:
     depth: int = 2
     size_conv_filters: int = 32
 
+
+@evented
+@dataclass
+class PredConfigurationSignal:
+
+    load_from_disk: bool = True
+
+    if _has_napari:
+        layer_pred: Image = None
+
+    path_pred: str = ""
+    tiled: bool = False
+    tile_size_xy: int = 64
+    tile_size_z: int = 8
+    tile_overlap_xy: int = 48 # TODO currently fixed
+    tile_overlap_z: int = 4 # TODO currently fixed

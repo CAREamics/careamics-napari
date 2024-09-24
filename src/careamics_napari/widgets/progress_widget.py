@@ -11,14 +11,12 @@ from qtpy.QtWidgets import (
 from careamics_napari.signals import TrainingStatus, TrainingState
 from careamics_napari.widgets import create_progressbar, TBPlotWidget
 
-class ProgressWidget(QGroupBox):
+class TrainProgressWidget(QGroupBox):
         
     def __init__(
             self: Self,
             signal: Optional[TrainingStatus] = None
     ) -> None:
-        super().__init__() # TODO needed? and in the other classes? to pass parent?
-
         self.train_status = signal
 
         self.setTitle("Training progress")
@@ -52,8 +50,6 @@ class ProgressWidget(QGroupBox):
             self.train_status.events.max_epochs.connect(self._update_max_epoch)
             self.train_status.events.batch_idx.connect(self._update_batch)
             self.train_status.events.max_batches.connect(self._update_max_batch)
-
-            # TODO is it enough to listen to the val loss?
             self.train_status.events.val_loss.connect(self._update_loss)
 
     def _update_trainng_state(self, state: TrainingState):
@@ -94,7 +90,7 @@ if __name__ == "__main__":
     signal = TrainingStatus()
 
     # Instantiate widget
-    widget = ProgressWidget(signal)
+    widget = TrainProgressWidget(signal)
 
     # Show the widget
     widget.show()

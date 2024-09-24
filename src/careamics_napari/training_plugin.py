@@ -19,14 +19,20 @@ from careamics_napari.widgets import (
     ScrollWidgetWrapper,
     ConfigurationWidget,
     TrainingWidget,
-    ProgressWidget
+    TrainProgressWidget,
+    PredictionWidget
 )
 from careamics_napari.signals import (
     TrainConfigurationSignal, 
     TrainingStatus, 
     TrainingState,
-    Update,
-    UpdateType
+    TrainUpdate,
+    TrainUpdateType,
+    PredConfigurationSignal,
+    PredictionState,
+    PredictionStatus,
+    PredictionUpdate,
+    PredictionUpdateType
 )
 from careamics_napari.careamics_utils import train_worker, free_memory
 
@@ -58,8 +64,10 @@ class TrainPlugin(QWidget):
         self.careamist = None
 
         # create signals
-        self.config_signal = TrainConfigurationSignal()
+        self.train_config_signal = TrainConfigurationSignal()
         self.train_signal = TrainingStatus()
+        self.pred_config_signal = PredConfigurationSignal()
+        self.pred_signal = PredictionStatus()
 
         self.init_ui()
 
@@ -88,7 +96,7 @@ class TrainPlugin(QWidget):
         gpu_button.setAlignment(Qt.AlignmentFlag.AlignRight)
         gpu_button.setContentsMargins(0, 5, 0, 0) # top margin
 
-        algo_choice = AlgorithmChoiceWidget(signal=self.config_signal)
+        algo_choice = AlgorithmChoiceWidget(signal=self.train_config_signal)
         gpu_button.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
         algo_panel.layout().addWidget(algo_choice)
@@ -99,9 +107,9 @@ class TrainPlugin(QWidget):
         # add data tabs
         self.data_stck = QStackedWidget()
         self.data_layers = [
-            TrainDataWidget(signal=self.config_signal),
+            TrainDataWidget(signal=self.train_config_signal),
             TrainDataWidget(
-                signal=self.config_signal, use_target=True
+                signal=self.train_config_signal, use_target=True
             ),
         ]
         for layer in self.data_layers:
@@ -111,7 +119,7 @@ class TrainPlugin(QWidget):
         self.layout().addWidget(self.data_stck)
 
         # add configuration widget
-        self.config_widget = ConfigurationWidget(self.config_signal)
+        self.config_widget = ConfigurationWidget(self.train_config_signal)
         self.layout().addWidget(self.config_widget)
 
         # add train widget
@@ -119,26 +127,38 @@ class TrainPlugin(QWidget):
         self.layout().addWidget(self.train_widget)
 
         # add progress widget
-        self.progress_widget = ProgressWidget(self.train_signal)
+        self.progress_widget = TrainProgressWidget(self.train_signal)
         self.layout().addWidget(self.progress_widget)
 
-        # connect signals
-        if self.config_signal is not None:
-            # changes from the selected algorithm
-            self.config_signal.events.algorithm.connect(self._set_data_from_algorithm)
-            self._set_data_from_algorithm(self.config_signal.algorithm) # force update
+        # add prediction
+        self.prediction_widget = PredictionWidget(
+            self.train_signal,
+            self.pred_signal,
+            self.train_config_signal,
+            self.pred_config_signal
+        )
 
-            # changes from the training state
+        # add saving
+        # TODO
+
+        # connect signals
+        if self.train_config_signal is not None:
+            # changes from the selected algorithm
+            self.train_config_signal.events.algorithm.connect(self._set_data_from_algorithm)
+            self._set_data_from_algorithm(self.train_config_signal.algorithm) # force update
+
+            # changes from the training or prediction state
             self.train_signal.events.state.connect(self._training_state_changed)
+            self.pred_signal.events.state.connect(self._prediction_state_changed)
 
     def _training_state_changed(self, state: TrainingState) -> None:
         if state == TrainingState.TRAINING:
             self.train_worker = train_worker(
-                self.config_signal,
+                self.train_config_signal,
                 self.careamist
             )
             
-            self.train_worker.yielded.connect(self._update)
+            self.train_worker.yielded.connect(self._update_from_training)
             self.train_worker.start()
 
         elif state == TrainingState.STOPPED:
@@ -150,13 +170,26 @@ class TrainPlugin(QWidget):
                 del self.careamist
                 self.careamist = None
 
-    def _update(self, update: Update) -> None:
+    def _prediction_state_changed(self, state: PredictionState) -> None:
+        if state == PredictionState.PREDICTING:
+            self.pred_worker = None # TODO
+            
+            # self.pred_worker.yielded.connect(self._update)
+            # self.pred_worker.start()
+
+        elif state == PredictionState.STOPPED:
+            # if self.careamist is not None:
+            #     self.careamist.stop_prediction()
+            # TODO
+            pass
+
+    def _update_from_training(self, update: TrainUpdate) -> None:
         """Update the signal from the training worker."""
-        if update.type == UpdateType.CAREAMIST:
+        if update.type == TrainUpdateType.CAREAMIST:
             self.careamist = update.value
-        elif update.type == UpdateType.DEBUG:
+        elif update.type == TrainUpdateType.DEBUG:
             print(update.value)
-        elif update.type == UpdateType.EXCEPTION:
+        elif update.type == TrainUpdateType.EXCEPTION:
             self.train_signal.state = TrainingState.CRASHED
             raise update.value
         else:

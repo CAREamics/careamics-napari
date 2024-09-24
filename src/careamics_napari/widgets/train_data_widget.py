@@ -43,10 +43,10 @@ class TrainDataWidget(QTabWidget):
 
         Parameters
         ----------
+        signal : TrainConfigurationSignal, default=None
+            Signal to be updated with changed in widgets values.
         use_target : bool, default=False
             Use train and validation target fields.
-        napari_viewer : napari.Viewer or None, default=None
-            Napari viewer.
         """
         super().__init__()
         self.config_signal = signal
@@ -80,15 +80,13 @@ class TrainDataWidget(QTabWidget):
             layer_tab: QWidget, 
     ) -> None:
         if _has_napari and napari.current_viewer() is not None:
+            widget_layers = QWidget()
+            widget_layers.setLayout(QFormLayout())
 
-            self.img_train = layer_choice(
-                name="Train", annotation=Image
-            )
+            self.img_train = layer_choice()
             self.img_train.native.setToolTip('Select a training layer.')
 
-            self.img_val = layer_choice(
-                name="Val", annotation=Image
-            )
+            self.img_val = layer_choice()
             self.img_train.native.setToolTip('Select a validation layer.')
 
             # connection actions for images
@@ -97,12 +95,8 @@ class TrainDataWidget(QTabWidget):
 
             if self.use_target:
                 # get the target layers
-                self.target_train = layer_choice(
-                    name="Train target", annotation=Image
-                )
-                self.target_val = layer_choice(
-                    name="Val target", annotation=Image
-                )
+                self.target_train = layer_choice()
+                self.target_val = layer_choice()
 
                 # tool tips
                 self.target_train.native.setToolTip(
@@ -117,18 +111,16 @@ class TrainDataWidget(QTabWidget):
                 self.target_train.changed.connect(self._update_train_target_layer)
                 self.target_val.changed.connect(self._update_val_target_layer)
 
-                layer_selector = Container(widgets=[
-                        self.img_train, 
-                        self.target_train,
-                        self.img_val,
-                        self.target_val
-                    ]
-                )
+                widget_layers.layout().addRow("Train", self.img_train.native)
+                widget_layers.layout().addRow("Val", self.img_val.native)
+                widget_layers.layout().addRow("Train target", self.target_train.native)
+                widget_layers.layout().addRow("Val target", self.target_val.native)
 
-            else:
-                layer_selector = Container(widgets=[self.img_train, self.img_val])
-            
-            layer_tab.layout().addWidget(layer_selector.native)
+            else:            
+                widget_layers.layout().addRow("Train", self.img_train.native)
+                widget_layers.layout().addRow("Val", self.img_val.native)
+
+            layer_tab.layout().addWidget(widget_layers)
 
         else:
             # simply remove the tab
@@ -255,7 +247,7 @@ if __name__ == "__main__":
 
     # add napari-n2v plugin
     viewer.window.add_dock_widget(TrainDataWidget(
-        TrainConfigurationSignal(), True, viewer
+        TrainConfigurationSignal(), True
     ))
 
     # add image to napari

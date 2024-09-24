@@ -7,6 +7,7 @@ from magicgui.widgets import Widget, create_widget
 # at run time
 try:
     from napari import current_viewer
+    from napari.layers import Image
 except ImportError:
     _has_napari = False
 else:
@@ -14,7 +15,7 @@ else:
 
 
 
-def layer_choice(name: str, annotation: Optional[Any], **kwargs: Any) -> Widget:
+def layer_choice(annotation: Optional[Any] = Image, **kwargs: Any) -> Widget:
     """Create a widget to select a layer from the napari viewer.
 
     Parameters
@@ -39,7 +40,7 @@ def layer_choice(name: str, annotation: Optional[Any], **kwargs: Any) -> Widget:
     if not _has_napari:
         raise ImportError("napari is not installed.")
 
-    widget: Widget = create_widget(name=name, annotation=annotation, **kwargs)
+    widget: Widget = create_widget(annotation=annotation, **kwargs)
     widget.reset_choices()
     viewer = current_viewer()
     

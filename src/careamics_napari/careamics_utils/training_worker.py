@@ -12,8 +12,8 @@ from careamics.config.support import SupportedAlgorithm
 from careamics_napari.careamics_utils.callback import UpdaterCallBack
 from careamics_napari.careamics_utils.configuration import create_configuration
 from careamics_napari.signals import (
-    Update,
-    UpdateType,
+    TrainUpdate,
+    TrainUpdateType,
     TrainingState, 
     TrainConfigurationSignal
 )
@@ -26,7 +26,7 @@ from careamics_napari.signals import (
 def train_worker(
     config_signal: TrainConfigurationSignal,
     careamist: Optional[CAREamist] = None,
-) -> Generator[Update, None, None]:
+) -> Generator[TrainUpdate, None, None]:
 
     # create update queue
     update_queue = Queue(10)
@@ -44,18 +44,18 @@ def train_worker(
 
     # look for updates
     while True:
-        update: Update = update_queue.get(block=True)
+        update: TrainUpdate = update_queue.get(block=True)
         
         yield update
 
         if (
-            (update.type == UpdateType.STATE and update.value == TrainingState.DONE)
-            or (update.type == UpdateType.EXCEPTION)
+            (update.type == TrainUpdateType.STATE and update.value == TrainingState.DONE)
+            or (update.type == TrainUpdateType.EXCEPTION)
         ):
             break
 
 def _push_exception(queue: Queue, e: Exception) -> None:
-    queue.put(Update(UpdateType.EXCEPTION, e))
+    queue.put(TrainUpdate(TrainUpdateType.EXCEPTION, e))
 
 def _train(
         config_signal: TrainConfigurationSignal, 
@@ -85,7 +85,7 @@ def _train(
             )
         
     # Register CAREamist
-    update_queue.put(Update(UpdateType.CAREAMIST, careamist))
+    update_queue.put(TrainUpdate(TrainUpdateType.CAREAMIST, careamist))
 
     # Format data
     train_data_target = None
@@ -195,7 +195,7 @@ def _train(
 
     except Exception as e:
         update_queue.put(
-            Update(UpdateType.EXCEPTION, e)
+            TrainUpdate(TrainUpdateType.EXCEPTION, e)
         )
 
-    update_queue.put(Update(UpdateType.STATE, TrainingState.DONE))
+    update_queue.put(TrainUpdate(TrainUpdateType.STATE, TrainingState.DONE))
