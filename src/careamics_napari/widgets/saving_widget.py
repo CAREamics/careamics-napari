@@ -77,10 +77,16 @@ class SavingWidget(QGroupBox):
 
     def _save_model(self):
         if self.save_status is not None:
-            if self.save_status.state == SavingState.IDLE:
-                destination = Path(QFileDialog.getSaveFileName(caption='Save model')[0])
+            if (
+                self.save_status.state == SavingState.IDLE
+                or self.save_status.state == SavingState.DONE
+                or self.save_status.state == SavingState.CRASHED
+            ):
+                #destination = Path(QFileDialog.getSaveFileName(caption='Save model'))
+                destination = Path(QFileDialog.getExistingDirectory(caption='Save model'))
                 self.save_signal.path_model = destination
 
+                # trigger saving
                 self.save_status.state = SavingState.SAVING
 
 

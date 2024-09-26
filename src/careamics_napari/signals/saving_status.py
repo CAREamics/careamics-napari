@@ -22,7 +22,8 @@ class SavingUpdateType(str, Enum):
 class SavingState(IntEnum):
     IDLE = 0
     SAVING = 1
-    CRASHED = 4
+    DONE = 2
+    CRASHED = 3
 
 
 @dataclass

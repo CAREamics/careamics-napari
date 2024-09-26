@@ -153,7 +153,8 @@ class PredictionWidget(QGroupBox):
         if self.pred_status is not None:
             if (
                 self.pred_status.state == PredictionState.IDLE
-                and self.train_status.state == TrainingState.DONE
+                or self.train_status.state == TrainingState.DONE
+                or self.pred_status.state == PredictionState.CRASHED
             ):
                 self.pred_status.state = PredictionState.PREDICTING
                 self.predict_button.setText('Stop')

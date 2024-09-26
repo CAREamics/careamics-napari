@@ -38,9 +38,11 @@ from careamics_napari.signals import (
     PredictionUpdateType,
     SavingSignal,
     SavingUpdate,
-    SavingStatus
+    SavingStatus,
+    SavingState,
+    SavingUpdateType
 )
-from careamics_napari.workers import train_worker, predict_worker
+from careamics_napari.workers import train_worker, predict_worker, save_worker
 
 if TYPE_CHECKING:
     import napari
@@ -56,7 +58,14 @@ else:
     _has_napari = True
 
 # TODO: add logging to napari
-# TODO add loading of existing model?
+# TODO add loading of existing model
+
+# TODO current issues:
+# - cannot restart prediction after exception
+# - random illegal hardware instruction 
+# - saving BMZ
+# - loading trained model
+# - prediction only plugin (and to disk)
 
 class TrainPluginWrapper(ScrollWidgetWrapper):
     def __init__(self: Self, napari_viewer: Optional[napari.Viewer] = None) -> None:
@@ -181,9 +190,10 @@ class TrainPlugin(QWidget):
         self.train_config_signal.events.algorithm.connect(self._set_data_from_algorithm)
         self._set_data_from_algorithm(self.train_config_signal.algorithm) # force update
 
-        # changes from the training or prediction state
+        # changes from the training, prediction or saving state
         self.train_status.events.state.connect(self._training_state_changed)
         self.pred_status.events.state.connect(self._prediction_state_changed)
+        self.save_status.events.state.connect(self._saving_state_changed)
 
     def _set_pred_3d(self, is_3d: bool) -> None:
         """Set the prediction widget to 3D mode."""
@@ -222,6 +232,29 @@ class TrainPlugin(QWidget):
         elif state == PredictionState.STOPPED:
             self.careamist.stop_prediction()
 
+    def _saving_state_changed(self, state: SavingState) -> None:
+        if state == SavingState.SAVING:
+            self.save_worker = save_worker(
+                self.careamist,
+                self.train_config_signal,
+                self.save_config_signal
+            )
+            
+            self.save_worker.yielded.connect(self._update_from_saving)
+            self.save_worker.start()
+
+    def _update_from_training(self, update: TrainUpdate) -> None:
+        """Update the signal from the training worker."""
+        if update.type == TrainUpdateType.CAREAMIST:
+            self.careamist = update.value
+        elif update.type == TrainUpdateType.DEBUG:
+            print(update.value)
+        elif update.type == TrainUpdateType.EXCEPTION:
+            self.train_status.state = TrainingState.CRASHED
+            raise update.value
+        else:
+            self.train_status.update(update)
+
     def _update_from_prediction(self, update: PredictionUpdate) -> None:
         """Update the signal from the prediction worker."""
         if update.type == PredictionUpdateType.DEBUG:
@@ -230,7 +263,7 @@ class TrainPlugin(QWidget):
             self.pred_status.state = PredictionState.CRASHED
 
             # print exception without raising it
-            print(f"Erro: {update.value}")
+            print(f"Error: {update.value}")
 
             if _has_napari:
                 ntf.show_error(
@@ -247,17 +280,20 @@ class TrainPlugin(QWidget):
             else:
                 self.pred_status.update(update)
 
-    def _update_from_training(self, update: TrainUpdate) -> None:
-        """Update the signal from the training worker."""
-        if update.type == TrainUpdateType.CAREAMIST:
-            self.careamist = update.value
-        elif update.type == TrainUpdateType.DEBUG:
+    def _update_from_saving(self, update: SavingUpdate) -> None:
+        """Update the signal from the saving worker."""
+        if update.type == SavingUpdateType.DEBUG:
             print(update.value)
-        elif update.type == TrainUpdateType.EXCEPTION:
-            self.train_status.state = TrainingState.CRASHED
-            raise update.value
-        else:
-            self.train_status.update(update)
+        elif update.type == SavingUpdateType.EXCEPTION:
+            self.save_status.state = SavingState.CRASHED
+            
+            # print exception without raising it
+            print(f"Error: {update.value}")
+
+            if _has_napari:
+                ntf.show_error(
+                    "An error occurred during saving."
+                )
             
     def _set_data_from_algorithm(self, name: str) -> None:
         """Set the data selection widget based on the algorithm."""
