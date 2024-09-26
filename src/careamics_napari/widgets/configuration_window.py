@@ -18,7 +18,7 @@ from qtpy.QtWidgets import (
 
 from careamics.config.support import SupportedAlgorithm
 
-from careamics_napari.signals import TrainConfigurationSignal
+from careamics_napari.signals import TrainingSignal
 from careamics_napari.widgets import create_int_spinbox
 
 
@@ -33,7 +33,7 @@ from careamics_napari.widgets import create_int_spinbox
 # TODO add default values from the configuration_signal
 class AdvancedConfigurationWindow(QDialog):
 
-    def __init__(self, parent: QWidget, signal: Optional[TrainConfigurationSignal] = None):
+    def __init__(self, parent: QWidget, signal: Optional[TrainingSignal] = None):
         super().__init__(parent)
         
         self.configuration_signal = signal
@@ -249,7 +249,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     # Signals
-    myalgo = TrainConfigurationSignal(use_channels=False)
+    myalgo = TrainingSignal(use_channels=False)
 
     # Instantiate widget
     widget = AdvancedConfigurationWindow(signal=myalgo)

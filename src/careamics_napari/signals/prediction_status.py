@@ -42,8 +42,8 @@ class PredictionUpdate:
 @evented
 @dataclass
 class PredictionStatus:
-    """Dataclass used to update the training UI with the current status and progress
-    of the training process.
+    """Dataclass used to update the prediction UI with the current status and progress
+    of the prediction process.
     """
 
     if TYPE_CHECKING:
@@ -51,6 +51,7 @@ class PredictionStatus:
 
     max_samples: int = -1
     sample_idx: int = -1
+    sample: NDArray = None
     state: PredictionState = PredictionState.IDLE
 
     def update(self, new_update: PredictionUpdate) -> None:

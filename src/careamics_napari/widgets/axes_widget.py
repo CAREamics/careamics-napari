@@ -5,7 +5,7 @@ from qtpy import QtGui
 from qtpy.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QWidget
 
 from careamics_napari.utils import REF_AXES, are_axes_valid, filter_dimensions
-from careamics_napari.signals import TrainConfigurationSignal
+from careamics_napari.signals import TrainingSignal
 
 class Highlight(Enum):
     VALID = 0
@@ -37,7 +37,7 @@ class AxesWidget(QWidget):
             self, 
             n_axes=3, 
             is_3D=False, 
-            signal: Optional[TrainConfigurationSignal] = None
+            signal: Optional[TrainingSignal] = None
         ) -> None:
         super().__init__()
         self.configuration_signal = signal
@@ -144,7 +144,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     # Signals
-    myalgo = TrainConfigurationSignal()
+    myalgo = TrainingSignal()
 
     @myalgo.events.use_channels.connect
     def print_axes():

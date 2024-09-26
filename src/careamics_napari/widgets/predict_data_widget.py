@@ -14,7 +14,7 @@ from careamics_napari.widgets import (
     FolderWidget,
     layer_choice
 )
-from careamics_napari.signals import PredConfigurationSignal
+from careamics_napari.signals import PredictionSignal
 
 if TYPE_CHECKING:
     import napari
@@ -36,7 +36,7 @@ class PredictDataWidget(QTabWidget):
 
     def __init__(
             self: Self, 
-            signal: Optional[PredConfigurationSignal] = None,
+            signal: Optional[PredictionSignal] = None,
     ) -> None:
         """Constructor.
 
@@ -148,7 +148,7 @@ if __name__ == "__main__":
     # add napari-n2v plugin
     viewer.window.add_dock_widget(
         PredictDataWidget(
-            PredConfigurationSignal()
+            PredictionSignal()
         )
     )
 

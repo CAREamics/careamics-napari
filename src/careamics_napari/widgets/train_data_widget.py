@@ -14,7 +14,7 @@ from careamics_napari.widgets import (
     FolderWidget,
     layer_choice
 )
-from careamics_napari.signals import TrainConfigurationSignal
+from careamics_napari.signals import TrainingSignal
 
 if TYPE_CHECKING:
     import napari
@@ -36,7 +36,7 @@ class TrainDataWidget(QTabWidget):
 
     def __init__(
             self: Self, 
-            signal: Optional[TrainConfigurationSignal] = None,
+            signal: Optional[TrainingSignal] = None,
             use_target: bool = False, 
     ) -> None:
         """Constructor.
@@ -247,7 +247,7 @@ if __name__ == "__main__":
 
     # add napari-n2v plugin
     viewer.window.add_dock_widget(TrainDataWidget(
-        TrainConfigurationSignal(), True
+        TrainingSignal(), True
     ))
 
     # add image to napari

@@ -1,6 +1,7 @@
 """CAREamics training Qt widget."""
 from typing import Optional, TYPE_CHECKING
 from typing_extensions import Self
+from queue import Queue
 
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (
@@ -20,21 +21,25 @@ from careamics_napari.widgets import (
     ConfigurationWidget,
     TrainingWidget,
     TrainProgressWidget,
-    PredictionWidget
+    PredictionWidget,
+    SavingWidget
 )
 from careamics_napari.signals import (
-    TrainConfigurationSignal, 
+    TrainingSignal, 
     TrainingStatus, 
     TrainingState,
     TrainUpdate,
     TrainUpdateType,
-    PredConfigurationSignal,
+    PredictionSignal,
     PredictionState,
     PredictionStatus,
     PredictionUpdate,
-    PredictionUpdateType
+    PredictionUpdateType,
+    SavingSignal,
+    SavingUpdate,
+    SavingStatus
 )
-from careamics_napari.careamics_utils import train_worker, free_memory
+from careamics_napari.workers import train_worker, predict_worker
 
 if TYPE_CHECKING:
     import napari
@@ -64,11 +69,19 @@ class TrainPlugin(QWidget):
         self.viewer = napari_viewer
         self.careamist = None
 
-        # create signals
-        self.train_config_signal = TrainConfigurationSignal()
-        self.train_signal = TrainingStatus()
-        self.pred_config_signal = PredConfigurationSignal()
-        self.pred_signal = PredictionStatus()
+        # create statuses, used to keep track of the threads statuses
+        self.train_status = TrainingStatus()
+        self.pred_status = PredictionStatus()
+        self.save_status = SavingStatus()
+
+        # create signals, used to hold the various parameters modified by the UI
+        self.train_config_signal = TrainingSignal()
+        self.pred_config_signal = PredictionSignal()
+        self.save_config_signal = SavingSignal()
+
+        # create queues, used to communicate between the threads and the UI
+        self._training_queue = Queue(10)
+        self._prediction_queue = Queue(10)
 
         self.init_ui()
 
@@ -84,7 +97,7 @@ class TrainPlugin(QWidget):
             CAREamicsBanner(
                 title_label="CAREamics",
                 short_desc=(
-                    "CAREamics UI for training denoising model."
+                    "CAREamics UI for training denoising models."
                 )
             )
         )
@@ -97,7 +110,9 @@ class TrainPlugin(QWidget):
         gpu_button.setAlignment(Qt.AlignmentFlag.AlignRight)
         gpu_button.setContentsMargins(0, 5, 0, 0) # top margin
 
-        algo_choice = AlgorithmChoiceWidget(signal=self.train_config_signal)
+        algo_choice = AlgorithmChoiceWidget(
+            signal=self.train_config_signal
+        )
         gpu_button.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
         algo_panel.layout().addWidget(algo_choice)
@@ -120,43 +135,51 @@ class TrainPlugin(QWidget):
         self.layout().addWidget(self.data_stck)
 
         # add configuration widget
-        self.config_widget = ConfigurationWidget(self.train_config_signal)
+        self.config_widget = ConfigurationWidget(
+            self.train_config_signal
+        )
         self.layout().addWidget(self.config_widget)
 
         # add train widget
-        self.train_widget = TrainingWidget(self.train_signal)
+        self.train_widget = TrainingWidget(self.train_status)
         self.layout().addWidget(self.train_widget)
 
         # add progress widget
-        self.progress_widget = TrainProgressWidget(self.train_signal)
+        self.progress_widget = TrainProgressWidget(self.train_status)
         self.layout().addWidget(self.progress_widget)
 
         # add prediction
         self.prediction_widget = PredictionWidget(
-            self.train_signal,
-            self.pred_signal,
+            self.train_status,
+            self.pred_status,
             self.train_config_signal,
-            self.pred_config_signal
+            self.pred_config_signal,
         )
         self.layout().addWidget(self.prediction_widget)
 
         # add saving
-        # TODO
+        self.saving_widget = SavingWidget(
+            train_status=self.train_status,
+            save_status=self.save_status,
+            save_signal=self.save_config_signal,
+        )
+        self.layout().addWidget(self.saving_widget)
 
         # connect signals
-        if self.train_config_signal is not None:
-            # changes from the selected algorithm
-            self.train_config_signal.events.algorithm.connect(self._set_data_from_algorithm)
-            self._set_data_from_algorithm(self.train_config_signal.algorithm) # force update
+        # changes from the selected algorithm
+        self.train_config_signal.events.algorithm.connect(self._set_data_from_algorithm)
+        self._set_data_from_algorithm(self.train_config_signal.algorithm) # force update
 
-            # changes from the training or prediction state
-            self.train_signal.events.state.connect(self._training_state_changed)
-            self.pred_signal.events.state.connect(self._prediction_state_changed)
+        # changes from the training or prediction state
+        self.train_status.events.state.connect(self._training_state_changed)
+        self.pred_status.events.state.connect(self._prediction_state_changed)
 
     def _training_state_changed(self, state: TrainingState) -> None:
         if state == TrainingState.TRAINING:
             self.train_worker = train_worker(
                 self.train_config_signal,
+                self._training_queue,
+                self._prediction_queue,
                 self.careamist
             )
             
@@ -164,26 +187,36 @@ class TrainPlugin(QWidget):
             self.train_worker.start()
 
         elif state == TrainingState.STOPPED:
-            if self.careamist is not None:
-                self.careamist.stop_training()
+            self.careamist.stop_training()
 
         elif state == TrainingState.CRASHED or state == TrainingState.IDLE:
-            if self.careamist is not None:
-                del self.careamist
-                self.careamist = None
+            del self.careamist
+            self.careamist = None
 
     def _prediction_state_changed(self, state: PredictionState) -> None:
         if state == PredictionState.PREDICTING:
-            self.pred_worker = None # TODO
+            self.pred_worker = predict_worker(
+                self.careamist,
+                self.pred_config_signal,
+                self._prediction_queue
+            )
             
-            # self.pred_worker.yielded.connect(self._update)
-            # self.pred_worker.start()
+            self.pred_worker.yielded.connect(self._update_from_prediction)
+            self.pred_worker.start()
 
         elif state == PredictionState.STOPPED:
-            # if self.careamist is not None:
-            #     self.careamist.stop_prediction()
-            # TODO
-            pass
+            self.careamist.stop_prediction()
+
+    def _update_from_prediction(self, update: PredictionUpdate) -> None:
+        """Update the signal from the prediction worker."""
+        if update.type == PredictionUpdateType.DEBUG:
+            print(update.value)
+        elif update.type == PredictionUpdateType.EXCEPTION:
+            self.pred_status.state = PredictionState.CRASHED
+            raise update.value
+        else:
+            # TODO when image is returned, have a napari controller put the image where it belongs
+            self.pred_status.update(update)
 
     def _update_from_training(self, update: TrainUpdate) -> None:
         """Update the signal from the training worker."""
@@ -192,10 +225,10 @@ class TrainPlugin(QWidget):
         elif update.type == TrainUpdateType.DEBUG:
             print(update.value)
         elif update.type == TrainUpdateType.EXCEPTION:
-            self.train_signal.state = TrainingState.CRASHED
+            self.train_status.state = TrainingState.CRASHED
             raise update.value
         else:
-            self.train_signal.update(update)
+            self.train_status.update(update)
             
     def _set_data_from_algorithm(self, name: str) -> None:
         """Set the data selection widget based on the algorithm."""
@@ -224,8 +257,12 @@ if __name__ == "__main__":
 
     # # Run the application event loop
     # sys.exit(app.exec_())
+    import faulthandler
 
     import napari
+
+    faulthandler.enable()
+    
     # create a Viewer
     viewer = napari.Viewer()
 

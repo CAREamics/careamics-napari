@@ -23,3 +23,4 @@ from .training_widget import TrainingWidget
 from .train_progress_widget import TrainProgressWidget
 from .predict_data_widget import PredictDataWidget
 from .prediction_widget import PredictionWidget
+from .saving_widget import SavingWidget

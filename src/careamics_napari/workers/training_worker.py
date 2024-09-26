@@ -9,14 +9,14 @@ import napari.utils.notifications as ntf
 from careamics import CAREamist
 from careamics.config.support import SupportedAlgorithm
 
-from careamics_napari.careamics_utils.callback import UpdaterCallBack
 from careamics_napari.careamics_utils.configuration import create_configuration
 from careamics_napari.signals import (
     TrainUpdate,
     TrainUpdateType,
     TrainingState, 
-    TrainConfigurationSignal
+    TrainingSignal
 )
+from careamics_napari.careamics_utils import UpdaterCallBack
 
 
 # TODO register CAREamist to continue training and predict 
@@ -24,19 +24,19 @@ from careamics_napari.signals import (
 # TODO pass careamist here if it already exists?
 @thread_worker
 def train_worker(
-    config_signal: TrainConfigurationSignal,
+    train_config_signal: TrainingSignal,
+    training_queue: Queue,
+    predict_queue: Queue,
     careamist: Optional[CAREamist] = None,
 ) -> Generator[TrainUpdate, None, None]:
-
-    # create update queue
-    update_queue = Queue(10)
 
     # start training thread
     training = Thread(
         target=_train, 
         args=(
-            config_signal, 
-            update_queue,
+            train_config_signal,
+            training_queue,
+            predict_queue,
             careamist,
         )
     )
@@ -44,7 +44,7 @@ def train_worker(
 
     # look for updates
     while True:
-        update: TrainUpdate = update_queue.get(block=True)
+        update: TrainUpdate = training_queue.get(block=True)
         
         yield update
 
@@ -54,25 +54,33 @@ def train_worker(
         ):
             break
 
+    # wait for the other thread to finish
+    training.join()
+
 def _push_exception(queue: Queue, e: Exception) -> None:
     queue.put(TrainUpdate(TrainUpdateType.EXCEPTION, e))
 
-def _train(
-        config_signal: TrainConfigurationSignal, 
-        update_queue: Queue, 
-        careamist: Optional[CAREamist] = None
+def _train( 
+    config_signal: TrainingSignal,   
+    training_queue: Queue,
+    predict_queue: Queue,
+    careamist: Optional[CAREamist] = None,
 ) -> None:
     
-    # get configuration
+    # get configuration and queue
     config = create_configuration(config_signal)
 
     # Create CAREamist
     if careamist is None:
-        careamist = CAREamist(
-            source=config, 
-            callbacks=[UpdaterCallBack(update_queue)]
+        careamist = CAREamist(config, callbacks=[
+                UpdaterCallBack(
+                    training_queue,
+                    predict_queue
+                )
+            ]
         )
-    else:
+
+    else: 
         # only update the number of epochs
         careamist.cfg.training_config.num_epochs = config.training_config.num_epochs
 
@@ -85,7 +93,7 @@ def _train(
             )
         
     # Register CAREamist
-    update_queue.put(TrainUpdate(TrainUpdateType.CAREAMIST, careamist))
+    training_queue.put(TrainUpdate(TrainUpdateType.CAREAMIST, careamist))
 
     # Format data
     train_data_target = None
@@ -95,7 +103,7 @@ def _train(
 
         if config_signal.path_train == "":
             _push_exception(
-                update_queue, 
+                training_queue, 
                 ValueError(
                     "Training data path is empty."
                 )
@@ -111,7 +119,7 @@ def _train(
         if config_signal.algorithm != SupportedAlgorithm.N2V:
             if config_signal.path_train_target == "":
                 _push_exception(
-                    update_queue, 
+                    training_queue, 
                     ValueError(
                         "Training target data path is empty."
                     )
@@ -130,7 +138,7 @@ def _train(
     else:
         if config_signal.layer_train is None:
             _push_exception(
-                update_queue, 
+                training_queue, 
                 ValueError(
                     "Training data path is empty."
                 )
@@ -143,14 +151,14 @@ def _train(
             else None
         )
 
-        if train_data == val_data:
+        if config_signal.layer_train.name == config_signal.layer_val.name:
             val_data = None
 
         if config_signal.algorithm != SupportedAlgorithm.N2V:
 
             if config_signal.layer_train_target is None:
                 _push_exception(
-                    update_queue, 
+                    training_queue, 
                     ValueError(
                         "Training target data path is empty."
                     )
@@ -165,6 +173,8 @@ def _train(
                     if config_signal.layer_val_target is not None 
                     else None
                 )
+            else:
+                val_data_target = None
 
     # TODO add val percentage and val minimum
     # Train CAREamist
@@ -194,8 +204,8 @@ def _train(
         #     time.sleep(0.2) 
 
     except Exception as e:
-        update_queue.put(
+        training_queue.put(
             TrainUpdate(TrainUpdateType.EXCEPTION, e)
         )
 
-    update_queue.put(TrainUpdate(TrainUpdateType.STATE, TrainingState.DONE))
+    training_queue.put(TrainUpdate(TrainUpdateType.STATE, TrainingState.DONE))

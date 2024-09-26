@@ -22,10 +22,10 @@ from careamics_napari.widgets import (
 from careamics_napari.signals import (
     TrainingStatus, 
     TrainingState,
-    TrainConfigurationSignal,
+    TrainingSignal,
     PredictionStatus, 
     PredictionState,
-    PredConfigurationSignal
+    PredictionSignal
 )
 
 class PredictionWidget(QGroupBox):
@@ -34,8 +34,8 @@ class PredictionWidget(QGroupBox):
             self: Self,
             train_status: Optional[TrainingStatus] = None,
             pred_status: Optional[PredictionStatus] = None,
-            train_config_signal: Optional[TrainConfigurationSignal] = None,
-            pred_config_signal: Optional[PredConfigurationSignal] = None
+            train_config_signal: Optional[TrainingSignal] = None,
+            pred_config_signal: Optional[PredictionSignal] = None
 
     ) -> None:
         super().__init__()
@@ -52,7 +52,7 @@ class PredictionWidget(QGroupBox):
         # data selection
         predict_data_widget = PredictDataWidget(self.pred_config_signal)
         self.layout().addWidget(predict_data_widget)
-        
+
         # checkbox
         self.tiling_cbox = QCheckBox('Tile prediction')
         self.tiling_cbox.setToolTip(
@@ -109,32 +109,36 @@ class PredictionWidget(QGroupBox):
             self.predict_button.clicked.connect(self._predict_button_clicked)
 
             # listening to the signals
-            self.train_config_signal.events.is_3d.connect(self.tile_size_xy.setEnabled)
+            self.train_config_signal.events.is_3d.connect(self._set_3d)
             self.train_status.events.state.connect(self._update_button_from_train)
             self.pred_status.events.state.connect(self._update_button_from_pred)
 
             self.pred_status.events.sample_idx.connect(self._update_sample_idx)
             self.pred_status.events.max_samples.connect(self._update_max_sample)
 
-    def _update_tiles(self, state: bool):
+    def _set_3d(self, state: bool) -> None:
+        if self.pred_config_signal.tiled:
+            self.tile_size_z.setEnabled(state)
+
+    def _update_tiles(self, state: bool) -> None:
         self.pred_config_signal.tiled = state
         self.tile_size_xy.setEnabled(state)
 
         if self.train_config_signal.is_3d:
             self.tile_size_z.setEnabled(state)
 
-    def _update_3d_tiles(self, state: bool):
+    def _update_3d_tiles(self, state: bool) -> None:
         if self.pred_config_signal.tiled:
             self.tile_size_z.setEnabled(state)
 
-    def _update_max_sample(self, max_sample: int):
+    def _update_max_sample(self, max_sample: int) -> None:
         self.pb_prediction.setMaximum(max_sample)
 
-    def _update_sample_idx(self, sample: int):
+    def _update_sample_idx(self, sample: int) -> None:
         self.pb_prediction.setValue(sample+1)
         self.pb_prediction.setFormat(f'Sample {sample+1}/{self.pred_status.max_samples}')
 
-    def _predict_button_clicked(self):
+    def _predict_button_clicked(self) -> None:
         if self.pred_status is not None:
             if (
                 self.pred_status.state == PredictionState.IDLE
@@ -147,13 +151,13 @@ class PredictionWidget(QGroupBox):
                 self.pred_status.state = PredictionState.STOPPED
                 self.predict_button.setText('Predict')
 
-    def _update_button_from_train(self, state: TrainingState):
+    def _update_button_from_train(self, state: TrainingState) -> None:
         if state == TrainingState.DONE:
             self.predict_button.setEnabled(True)
         else:
             self.predict_button.setEnabled(False)
 
-    def _update_button_from_pred(self, state: PredictionState):
+    def _update_button_from_pred(self, state: PredictionState) -> None:
         if (
             state == PredictionState.DONE
             or state == PredictionState.CRASHED
@@ -171,7 +175,7 @@ if __name__ == "__main__":
     # create signal
     train_signal = TrainingStatus()
     pred_signal = PredictionStatus()
-    config_signal = PredConfigurationSignal()
+    config_signal = PredictionSignal()
     
     # Instantiate widget
     widget = PredictionWidget(

@@ -1,4 +1,3 @@
-"""A signal representing the selected algorithm."""
 from psygnal import evented
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
@@ -7,7 +6,7 @@ if TYPE_CHECKING:
     from napari.layers import Image
     from psygnal import SignalGroup, SignalInstance
 
-    class ConfigurationSignalGroup(SignalGroup):
+    class TrainingSignalGroup(SignalGroup):
 
         # only parameters that have observers are listed here
         algorithm: SignalInstance
@@ -25,9 +24,9 @@ else:
 # TODO make sure defaults are used
 @evented
 @dataclass
-class TrainConfigurationSignal:
+class TrainingSignal:
     if TYPE_CHECKING:
-        events: ConfigurationSignalGroup
+        events: TrainingSignalGroup
 
     # signals used to change states across widgets
     algorithm: str = "n2v"
@@ -66,20 +65,3 @@ class TrainConfigurationSignal:
     use_n2v2: bool = False
     depth: int = 2
     size_conv_filters: int = 32
-
-
-@evented
-@dataclass
-class PredConfigurationSignal:
-
-    load_from_disk: bool = True
-
-    if _has_napari:
-        layer_pred: Image = None
-
-    path_pred: str = ""
-    tiled: bool = False
-    tile_size_xy: int = 64
-    tile_size_z: int = 8
-    tile_overlap_xy: int = 48 # TODO currently fixed
-    tile_overlap_z: int = 4 # TODO currently fixed

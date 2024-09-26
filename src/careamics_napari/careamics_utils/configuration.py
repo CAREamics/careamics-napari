@@ -9,10 +9,10 @@ from careamics.config import (
 from careamics.config.transformations import XYFlipModel, XYRandomRotate90Model
 from careamics.config.support import SupportedAlgorithm
 
-from careamics_napari.signals import TrainConfigurationSignal
+from careamics_napari.signals import TrainingSignal
 
 
-def create_configuration(signal: TrainConfigurationSignal) -> Configuration:
+def create_configuration(signal: TrainingSignal) -> Configuration:
     
     # experiment name
     if signal.experiment_name == "":

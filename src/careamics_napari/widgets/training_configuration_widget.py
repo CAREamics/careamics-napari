@@ -13,7 +13,7 @@ from qtpy.QtWidgets import (
     QCheckBox,
 )
 
-from careamics_napari.signals import TrainConfigurationSignal
+from careamics_napari.signals import TrainingSignal
 from careamics_napari.resources import ICON_GEAR
 from careamics_napari.widgets import (
     AxesWidget,
@@ -25,7 +25,7 @@ from careamics_napari.widgets import (
 
 class ConfigurationWidget(QGroupBox):
 
-    def __init__(self, signal: Optional[TrainConfigurationSignal] = None):
+    def __init__(self, signal: Optional[TrainingSignal] = None):
         super().__init__()
 
         self.configuration_signal = signal
@@ -133,7 +133,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     # Signals
-    myalgo = TrainConfigurationSignal()
+    myalgo = TrainingSignal()
 
     # Instantiate widget
     widget = ConfigurationWidget(myalgo)

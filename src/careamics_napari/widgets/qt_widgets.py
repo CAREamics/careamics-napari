@@ -50,7 +50,7 @@ class PowerOfTwoSpinBox(QSpinBox):
 
     def valueFromText(self, text):
         return int(text)
-
+    
 
 def create_double_spinbox(
     min_value: float = 0,

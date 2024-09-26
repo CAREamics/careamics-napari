@@ -10,12 +10,12 @@ from qtpy.QtWidgets import (
 )
 
 from careamics_napari.careamics_utils import get_available_algorithms, get_algorithm
-from careamics_napari.signals import TrainConfigurationSignal
+from careamics_napari.signals import TrainingSignal
 
 
 class AlgorithmChoiceWidget(QComboBox):
 
-    def __init__(self, signal: Optional[TrainConfigurationSignal] = None):
+    def __init__(self, signal: Optional[TrainingSignal] = None):
         super().__init__()
 
         self.signal = signal
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     from qtpy.QtWidgets import QApplication
     import sys
 
-    myalgo = TrainConfigurationSignal()
+    myalgo = TrainingSignal()
 
     @myalgo.events.name.connect
     def print_algorithm(name: str):
