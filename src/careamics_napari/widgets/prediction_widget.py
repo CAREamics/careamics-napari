@@ -157,11 +157,7 @@ class PredictionWidget(QGroupBox):
                 or self.pred_status.state == PredictionState.CRASHED
             ):
                 self.pred_status.state = PredictionState.PREDICTING
-                self.predict_button.setText('Stop')
-
-            elif self.pred_status.state == PredictionState.PREDICTING:
-                self.pred_status.state = PredictionState.STOPPED
-                self.predict_button.setText('Predict')
+                self.predict_button.setEnabled(False)
 
     def _update_button_from_train(self, state: TrainingState) -> None:
         if state == TrainingState.DONE:
@@ -174,7 +170,7 @@ class PredictionWidget(QGroupBox):
             state == PredictionState.DONE
             or state == PredictionState.CRASHED
         ):
-            self.predict_button.setText('Predict')
+            self.predict_button.setEnabled(True)
 
 
 if __name__ == "__main__":
