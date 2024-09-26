@@ -23,6 +23,7 @@ class PredictionSignal:
         layer_pred: Image = None
 
     path_pred: str = ""
+    is_3d: bool = False
     tiled: bool = False
     tile_size_xy: int = 64
     tile_size_z: int = 8

@@ -51,12 +51,12 @@ class PredictionStatus:
 
     max_samples: int = -1
     sample_idx: int = -1
-    sample: NDArray = None
     state: PredictionState = PredictionState.IDLE
 
     def update(self, new_update: PredictionUpdate) -> None:
         if (
             new_update.type != PredictionUpdateType.EXCEPTION
             and new_update.type != PredictionUpdateType.DEBUG
+            and new_update.type != PredictionUpdateType.SAMPLE
         ):
             setattr(self, new_update.type.value, new_update.value)

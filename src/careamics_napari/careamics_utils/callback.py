@@ -86,7 +86,8 @@ class UpdaterCallBack(Callback):
         self.prediction_queue.put(
             TrainUpdate(
                 PredictionUpdateType.MAX_SAMPLES,
-                trainer.num_predict_batches
+                # lightning returns a number of batches per dataloader
+                trainer.num_predict_batches[0]
             )
         )
 
@@ -101,7 +102,7 @@ class UpdaterCallBack(Callback):
     ) -> None:
         self.prediction_queue.put(
             PredictionUpdate(
-                PredictionUpdateType.SAMPLE,
+                PredictionUpdateType.SAMPLE_IDX,
                 batch_idx
             )
         )

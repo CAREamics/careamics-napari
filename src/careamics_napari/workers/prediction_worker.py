@@ -43,7 +43,10 @@ def predict_worker(
         
         yield update
 
-        if update.type == PredictionUpdateType.STATE:
+        if (
+            update.type == PredictionUpdateType.STATE
+            or update.type == PredictionUpdateType.EXCEPTION
+        ):
             break
 
 def _push_exception(queue: Queue, e: Exception) -> None:
@@ -79,35 +82,66 @@ def _predict(
             )
 
         pred_data = config_signal.layer_pred.data
+
+    # tiling
+    if config_signal.tiled:
+        if config_signal.is_3d:
+            tile_size = (
+                config_signal.tile_size_z, 
+                config_signal.tile_size_xy, 
+                config_signal.tile_size_xy
+            )
+            tile_overlap = (
+                config_signal.tile_overlap_z, 
+                config_signal.tile_overlap_xy, 
+                config_signal.tile_overlap_xy    
+            )
+        else:
+            tile_size = (
+                config_signal.tile_size_xy, 
+                config_signal.tile_size_xy
+            )
+            tile_overlap = (
+                config_signal.tile_overlap_xy, 
+                config_signal.tile_overlap_xy
+            )
+    else:
+        tile_size = None
+        tile_overlap = None
      
     # Predict with CAREamist
     try:
-        # careamist.train(
-        #     train_source=train_data, 
-        #     val_source=val_data,
-        #     train_target=train_data_target,
-        #     val_target=val_data_target,
-        # )
+        result = careamist.predict(
+            source=pred_data,
+            data_type="tiff" if config_signal.load_from_disk else "array",
+            tile_size=tile_size,
+            tile_overlap=tile_overlap,
+        )
+
+        update_queue.put(PredictionUpdate(PredictionUpdateType.SAMPLE, result))
 
         # # TODO can we use this to monkey patch the training process?
-        import time
-        update_queue.put(PredictionUpdate(PredictionUpdateType.MAX_SAMPLES, 1_000 // 10))
-        for i in range(1_000):
+        # import time
+        # update_queue.put(PredictionUpdate(PredictionUpdateType.MAX_SAMPLES, 1_000 // 10))
+        # for i in range(1_000):
 
-            # if stopper.stop:
-            #     update_queue.put(Update(UpdateType.STATE, TrainingState.STOPPED))
-            #     break
+        #     # if stopper.stop:
+        #     #     update_queue.put(Update(UpdateType.STATE, TrainingState.STOPPED))
+        #     #     break
 
-            if i % 10 == 0:
-                update_queue.put(PredictionUpdate(PredictionUpdateType.SAMPLE_IDX, i // 10))
-                print(i)
+        #     if i % 10 == 0:
+        #         update_queue.put(PredictionUpdate(PredictionUpdateType.SAMPLE_IDX, i // 10))
+        #         print(i)
 
       
-            time.sleep(0.2) 
+        #     time.sleep(0.2) 
 
     except Exception as e:
         update_queue.put(
             PredictionUpdate(PredictionUpdateType.EXCEPTION, e)
         )
+        return
 
+
+    # signify end of prediction
     update_queue.put(PredictionUpdate(PredictionUpdateType.STATE, PredictionState.DONE))

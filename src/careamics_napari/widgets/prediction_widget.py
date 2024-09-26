@@ -108,6 +108,9 @@ class PredictionWidget(QGroupBox):
             # what to do when the buttons are clicked
             self.predict_button.clicked.connect(self._predict_button_clicked)
 
+            self.tile_size_xy.valueChanged.connect(self._set_xy_tile_size)
+            self.tile_size_z.valueChanged.connect(self._set_z_tile_size)
+
             # listening to the signals
             self.train_config_signal.events.is_3d.connect(self._set_3d)
             self.train_status.events.state.connect(self._update_button_from_train)
@@ -115,6 +118,14 @@ class PredictionWidget(QGroupBox):
 
             self.pred_status.events.sample_idx.connect(self._update_sample_idx)
             self.pred_status.events.max_samples.connect(self._update_max_sample)
+
+    def _set_xy_tile_size(self, size: int) -> None:
+        if self.pred_config_signal is not None:
+            self.pred_config_signal.tile_size_xy = size
+
+    def _set_z_tile_size(self, size: int) -> None:
+        if self.pred_config_signal is not None:
+            self.pred_config_signal.tile_size_z = size
 
     def _set_3d(self, state: bool) -> None:
         if self.pred_config_signal.tiled:

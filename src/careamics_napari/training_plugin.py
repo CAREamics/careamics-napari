@@ -48,6 +48,8 @@ if TYPE_CHECKING:
 # at run time
 try:
     import napari
+    import napari.utils.notifications as ntf
+
 except ImportError:
     _has_napari = False
 else:
@@ -79,6 +81,8 @@ class TrainPlugin(QWidget):
         self.train_config_signal = TrainingSignal()
         self.pred_config_signal = PredictionSignal()
         self.save_config_signal = SavingSignal()
+
+        self.train_config_signal.events.is_3d.connect(self._set_pred_3d)
 
         # create queues, used to communicate between the threads and the UI
         self._training_queue = Queue(10)
@@ -181,6 +185,10 @@ class TrainPlugin(QWidget):
         self.train_status.events.state.connect(self._training_state_changed)
         self.pred_status.events.state.connect(self._prediction_state_changed)
 
+    def _set_pred_3d(self, is_3d: bool) -> None:
+        """Set the prediction widget to 3D mode."""
+        self.pred_config_signal.is_3d = is_3d
+
     def _training_state_changed(self, state: TrainingState) -> None:
         if state == TrainingState.TRAINING:
             self.train_worker = train_worker(
@@ -220,10 +228,24 @@ class TrainPlugin(QWidget):
             print(update.value)
         elif update.type == PredictionUpdateType.EXCEPTION:
             self.pred_status.state = PredictionState.CRASHED
-            raise update.value
+
+            # print exception without raising it
+            print(f"Erro: {update.value}")
+
+            if _has_napari:
+                ntf.show_error(
+                    "An error occurred during prediction. Check the console for more "
+                    "information. Note: if you get an error due to the sizes of "
+                    "Tensors, try using tiling."
+                )
+            
         else:
-            # TODO when image is returned, have a napari controller put the image where it belongs
-            self.pred_status.update(update)
+            if update.type == PredictionUpdateType.SAMPLE:
+                # add image to napari
+                # TODO keep scaling?
+                self.viewer.add_image(update.value, name="Prediction")
+            else:
+                self.pred_status.update(update)
 
     def _update_from_training(self, update: TrainUpdate) -> None:
         """Update the signal from the training worker."""
@@ -247,9 +269,9 @@ class TrainPlugin(QWidget):
         else:
             self.data_stck.setCurrentIndex(0)
 
-    def closeEent(self, event) -> None:
+    def closeEvent(self, event) -> None:
+        super().closeEvent(event)
         # TODO check training or prediction and stop it
-        pass
 
 
 if __name__ == "__main__":
