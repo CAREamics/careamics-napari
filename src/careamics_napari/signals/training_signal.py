@@ -1,6 +1,9 @@
 from psygnal import evented
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
+from pathlib import Path
+
+from careamics.utils import get_careamics_home
 
 if TYPE_CHECKING:
     from napari.layers import Image
@@ -34,6 +37,7 @@ class TrainingSignal:
     is_3d: bool = False
 
     # parameters set by widgets for training
+    work_dir: Union[str, Path] = get_careamics_home()
     load_from_disk: bool = True
 
     if _has_napari:

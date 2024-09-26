@@ -1,4 +1,5 @@
 import webbrowser
+from typing import Optional
 from pathlib import Path
 
 import pyqtgraph as pg
@@ -9,6 +10,7 @@ from qtpy.QtWidgets import QHBoxLayout, QLabel, QPushButton, QWidget
 
 from careamics_napari.resources import ICON_TF
 from careamics_napari.utils import get_default_path
+from careamics_napari.signals import TrainingSignal
 
 
 class TBPlotWidget(Container):
@@ -21,9 +23,16 @@ class TBPlotWidget(Container):
         pass
 
     def __init__(
-        self, min_width=None, min_height=None, max_width=None, max_height=None
+        self, 
+        min_width: int = None, 
+        min_height: int = None, 
+        max_width: int = None, 
+        max_height: int = None,
+        train_signal: Optional[TrainingSignal] = None
     ):
         super().__init__()
+
+        self.train_signal = train_signal
 
         if max_width:
             self.native.setMaximumWidth(max_width)
@@ -81,7 +90,7 @@ class TBPlotWidget(Container):
 
             self.tb = program.TensorBoard()
 
-            path = str(Path(get_default_path(), "models").absolute())
+            path = str(self.train_signal.work_dir / "logs" / "lightning_logs")
             self.tb.configure(argv=[None, "--logdir", path])
             self.url = self.tb.launch()
 

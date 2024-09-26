@@ -8,18 +8,20 @@ from qtpy.QtWidgets import (
     QGroupBox,
 )
 
-from careamics_napari.signals import TrainingStatus, TrainingState
+from careamics_napari.signals import TrainingStatus, TrainingState, TrainingSignal
 from careamics_napari.widgets import create_progressbar, TBPlotWidget
 
 class TrainProgressWidget(QGroupBox):
         
     def __init__(
             self: Self,
-            signal: Optional[TrainingStatus] = None
+            train_status: Optional[TrainingStatus] = None,
+            train_config: Optional[TrainingSignal] = None
+            
     ) -> None:
         super().__init__()
 
-        self.train_status = signal
+        self.train_status = train_status
 
         self.setTitle("Training progress")
         self.setLayout(QVBoxLayout())
@@ -29,19 +31,23 @@ class TrainProgressWidget(QGroupBox):
 
         self.pb_epochs = create_progressbar(
             max_value=self.train_status.max_epochs,
-            text_format=f'Epoch ?/{self.train_status.max_epochs}'
+            text_format=f'Epoch ?/{self.train_status.max_epochs}',
+            value=0,
         )
 
         self.pb_batch = create_progressbar(
             max_value=self.train_status.max_batches,
-            text_format=f'Batch ?/{self.train_status.max_batches}'
+            text_format=f'Batch ?/{self.train_status.max_batches}',
+            value=0,
         )
 
         self.layout().addWidget(self.pb_epochs)
         self.layout().addWidget(self.pb_batch)
 
         # plot widget
-        self.plot = TBPlotWidget(max_width=300, max_height=300, min_height=250)
+        self.plot = TBPlotWidget(
+            max_width=300, max_height=300, min_height=250, train_signal=train_config
+        )
         self.layout().addWidget(self.plot.native)
 
         # actions

@@ -2,6 +2,7 @@
 from typing import Optional, TYPE_CHECKING
 from typing_extensions import Self
 from queue import Queue
+from pathlib import Path
 
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (
@@ -83,6 +84,9 @@ class TrainPlugin(QWidget):
         self._training_queue = Queue(10)
         self._prediction_queue = Queue(10)
 
+        # set workdir
+        self.train_config_signal.work_dir = Path.cwd()
+
         self.init_ui()
 
     def init_ui(self) -> None:
@@ -145,7 +149,10 @@ class TrainPlugin(QWidget):
         self.layout().addWidget(self.train_widget)
 
         # add progress widget
-        self.progress_widget = TrainProgressWidget(self.train_status)
+        self.progress_widget = TrainProgressWidget(
+            self.train_status,
+            self.train_config_signal
+        )
         self.layout().addWidget(self.progress_widget)
 
         # add prediction
@@ -240,6 +247,9 @@ class TrainPlugin(QWidget):
         else:
             self.data_stck.setCurrentIndex(0)
 
+    def closeEent(self, event) -> None:
+        # TODO check training or prediction and stop it
+        pass
 
 
 if __name__ == "__main__":
@@ -261,7 +271,8 @@ if __name__ == "__main__":
 
     import napari
 
-    faulthandler.enable()
+    log_file_fd=open("fault_log.txt", "a")
+    faulthandler.enable(log_file_fd)
     
     # create a Viewer
     viewer = napari.Viewer()

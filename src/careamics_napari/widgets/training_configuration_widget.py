@@ -65,7 +65,7 @@ class ConfigurationWidget(QGroupBox):
             8, 512, 8
         )
         self.patch_Z_spin.setToolTip('Dimension of the patches in Z.')
-        self.patch_Z_spin.isEnabled(self.configuration_signal.is_3d)
+        self.patch_Z_spin.setEnabled(self.configuration_signal.is_3d)
 
         formLayout = QFormLayout()
         formLayout.addRow('Enable 3D', self.enable_3d)
