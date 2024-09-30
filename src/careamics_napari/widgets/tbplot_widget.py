@@ -1,6 +1,5 @@
 import webbrowser
 from typing import Optional
-from pathlib import Path
 
 import pyqtgraph as pg
 from magicgui.widgets import Container
@@ -9,7 +8,6 @@ from qtpy.QtGui import QCursor, QIcon, QPixmap
 from qtpy.QtWidgets import QHBoxLayout, QLabel, QPushButton, QWidget
 
 from careamics_napari.resources import ICON_TF
-from careamics_napari.utils import get_default_path
 from careamics_napari.signals import TrainingSignal
 
 
@@ -23,12 +21,12 @@ class TBPlotWidget(Container):
         pass
 
     def __init__(
-        self, 
-        min_width: int = None, 
-        min_height: int = None, 
-        max_width: int = None, 
+        self,
+        min_width: int = None,
+        min_height: int = None,
+        max_width: int = None,
         max_height: int = None,
-        train_signal: Optional[TrainingSignal] = None
+        train_signal: Optional[TrainingSignal] = None,
     ):
         super().__init__()
 

@@ -2,27 +2,30 @@
 
 from typing import Optional
 
-from qtpy.QtWidgets import (
-    QComboBox,
-    QWidget,
-    QHBoxLayout,
-    QLabel
-)
+from qtpy.QtWidgets import QComboBox
 
-from careamics_napari.careamics_utils import get_available_algorithms, get_algorithm
+from careamics_napari.careamics_utils import get_algorithm, get_available_algorithms
 from careamics_napari.signals import TrainingSignal
 
 
-class AlgorithmChoiceWidget(QComboBox):
+class AlgorithmSelectionWidget(QComboBox):
+    """Algorithm selection widget."""
 
-    def __init__(self, signal: Optional[TrainingSignal] = None):
+    def __init__(self, training_signal: Optional[TrainingSignal] = None) -> None:
+        """Initialize the widget.
+
+        Parameters
+        ----------
+        training_signal : TrainingSignal or None, default=None
+            Training signal holding all parameters to be set by the user.
+        """
         super().__init__()
 
-        self.signal = signal
+        self.signal = training_signal
 
         self.addItems(get_available_algorithms())
         self.setToolTip("Select an algorithm.")
-        
+
         # Connect the signal
         self.currentIndexChanged.connect(self.algorithm_changed)
         self.current_algorithm = self._get_current_algorithm()
@@ -39,7 +42,7 @@ class AlgorithmChoiceWidget(QComboBox):
 
     def algorithm_changed(self, index: int) -> None:
         """Emit the algorithm signal.
-        
+
         Parameters
         ----------
         index : int
@@ -54,8 +57,9 @@ class AlgorithmChoiceWidget(QComboBox):
 
 
 if __name__ == "__main__":
-    from qtpy.QtWidgets import QApplication
     import sys
+
+    from qtpy.QtWidgets import QApplication
 
     myalgo = TrainingSignal()
 
@@ -67,7 +71,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     # Instantiate widget
-    widget = AlgorithmChoiceWidget(myalgo)
+    widget = AlgorithmSelectionWidget(myalgo)
 
     # Show the widget
     widget.show()

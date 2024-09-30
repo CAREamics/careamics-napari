@@ -1,48 +1,44 @@
 """CAREamics training Qt widget."""
-from typing import Optional, TYPE_CHECKING
-from typing_extensions import Self
-from queue import Queue
-from pathlib import Path
 
-from qtpy.QtCore import Qt
-from qtpy.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QStackedWidget 
-)
+from pathlib import Path
+from queue import Queue
+from typing import TYPE_CHECKING, Optional
 
 from careamics.config.support import SupportedAlgorithm
-from careamics_napari.widgets import (
-    CAREamicsBanner,
-    create_gpu_label,
-    AlgorithmChoiceWidget,
-    TrainDataWidget,
-    ScrollWidgetWrapper,
-    ConfigurationWidget,
-    TrainingWidget,
-    TrainProgressWidget,
-    PredictionWidget,
-    SavingWidget
-)
+from qtpy.QtCore import Qt
+from qtpy.QtWidgets import QHBoxLayout, QStackedWidget, QVBoxLayout, QWidget
+from typing_extensions import Self
+
 from careamics_napari.signals import (
-    TrainingSignal, 
-    TrainingStatus, 
-    TrainingState,
-    TrainUpdate,
-    TrainUpdateType,
     PredictionSignal,
     PredictionState,
     PredictionStatus,
     PredictionUpdate,
     PredictionUpdateType,
     SavingSignal,
-    SavingUpdate,
-    SavingStatus,
     SavingState,
-    SavingUpdateType
+    SavingStatus,
+    SavingUpdate,
+    SavingUpdateType,
+    TrainingSignal,
+    TrainingState,
+    TrainingStatus,
+    TrainUpdate,
+    TrainUpdateType,
 )
-from careamics_napari.workers import train_worker, predict_worker, save_worker
+from careamics_napari.widgets import (
+    AlgorithmSelectionWidget,
+    CAREamicsBanner,
+    ConfigurationWidget,
+    PredictionWidget,
+    SavingWidget,
+    ScrollWidgetWrapper,
+    TrainDataWidget,
+    TrainingWidget,
+    TrainProgressWidget,
+    create_gpu_label,
+)
+from careamics_napari.workers import predict_worker, save_worker, train_worker
 
 if TYPE_CHECKING:
     import napari
@@ -62,10 +58,13 @@ else:
 
 # TODO current issues:
 # - cannot restart prediction after exception
-# - random illegal hardware instruction 
+# - random illegal hardware instruction
 # - saving BMZ
 # - loading trained model
 # - prediction only plugin (and to disk)
+
+# TODO prediction should reuse the name of the layer
+
 
 class TrainPluginWrapper(ScrollWidgetWrapper):
     def __init__(self: Self, napari_viewer: Optional[napari.Viewer] = None) -> None:
@@ -74,8 +73,8 @@ class TrainPluginWrapper(ScrollWidgetWrapper):
 
 class TrainPlugin(QWidget):
     def __init__(
-            self: Self,
-            napari_viewer: Optional[napari.Viewer] = None,
+        self: Self,
+        napari_viewer: Optional[napari.Viewer] = None,
     ) -> None:
         super().__init__()
         self.viewer = napari_viewer
@@ -104,7 +103,6 @@ class TrainPlugin(QWidget):
 
     def init_ui(self) -> None:
         """Assemble the widgets."""
-
         # layout
         self.setLayout(QVBoxLayout())
         self.setMinimumWidth(200)
@@ -113,23 +111,19 @@ class TrainPlugin(QWidget):
         self.layout().addWidget(
             CAREamicsBanner(
                 title_label="CAREamics",
-                short_desc=(
-                    "CAREamics UI for training denoising models."
-                )
+                short_desc=("CAREamics UI for training denoising models."),
             )
         )
 
         # add GPU label and algorithm selection
         algo_panel = QWidget()
         algo_panel.setLayout(QHBoxLayout())
-        
+
         gpu_button = create_gpu_label()
         gpu_button.setAlignment(Qt.AlignmentFlag.AlignRight)
-        gpu_button.setContentsMargins(0, 5, 0, 0) # top margin
+        gpu_button.setContentsMargins(0, 5, 0, 0)  # top margin
 
-        algo_choice = AlgorithmChoiceWidget(
-            signal=self.train_config_signal
-        )
+        algo_choice = AlgorithmSelectionWidget(training_signal=self.train_config_signal)
         gpu_button.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
         algo_panel.layout().addWidget(algo_choice)
@@ -141,9 +135,7 @@ class TrainPlugin(QWidget):
         self.data_stck = QStackedWidget()
         self.data_layers = [
             TrainDataWidget(signal=self.train_config_signal),
-            TrainDataWidget(
-                signal=self.train_config_signal, use_target=True
-            ),
+            TrainDataWidget(signal=self.train_config_signal, use_target=True),
         ]
         for layer in self.data_layers:
             self.data_stck.addWidget(layer)
@@ -152,9 +144,7 @@ class TrainPlugin(QWidget):
         self.layout().addWidget(self.data_stck)
 
         # add configuration widget
-        self.config_widget = ConfigurationWidget(
-            self.train_config_signal
-        )
+        self.config_widget = ConfigurationWidget(self.train_config_signal)
         self.layout().addWidget(self.config_widget)
 
         # add train widget
@@ -163,8 +153,7 @@ class TrainPlugin(QWidget):
 
         # add progress widget
         self.progress_widget = TrainProgressWidget(
-            self.train_status,
-            self.train_config_signal
+            self.train_status, self.train_config_signal
         )
         self.layout().addWidget(self.progress_widget)
 
@@ -188,7 +177,9 @@ class TrainPlugin(QWidget):
         # connect signals
         # changes from the selected algorithm
         self.train_config_signal.events.algorithm.connect(self._set_data_from_algorithm)
-        self._set_data_from_algorithm(self.train_config_signal.algorithm) # force update
+        self._set_data_from_algorithm(
+            self.train_config_signal.algorithm
+        )  # force update
 
         # changes from the training, prediction or saving state
         self.train_status.events.state.connect(self._training_state_changed)
@@ -205,9 +196,9 @@ class TrainPlugin(QWidget):
                 self.train_config_signal,
                 self._training_queue,
                 self._prediction_queue,
-                self.careamist
+                self.careamist,
             )
-            
+
             self.train_worker.yielded.connect(self._update_from_training)
             self.train_worker.start()
 
@@ -221,11 +212,9 @@ class TrainPlugin(QWidget):
     def _prediction_state_changed(self, state: PredictionState) -> None:
         if state == PredictionState.PREDICTING:
             self.pred_worker = predict_worker(
-                self.careamist,
-                self.pred_config_signal,
-                self._prediction_queue
+                self.careamist, self.pred_config_signal, self._prediction_queue
             )
-            
+
             self.pred_worker.yielded.connect(self._update_from_prediction)
             self.pred_worker.start()
 
@@ -235,11 +224,9 @@ class TrainPlugin(QWidget):
     def _saving_state_changed(self, state: SavingState) -> None:
         if state == SavingState.SAVING:
             self.save_worker = save_worker(
-                self.careamist,
-                self.train_config_signal,
-                self.save_config_signal
+                self.careamist, self.train_config_signal, self.save_config_signal
             )
-            
+
             self.save_worker.yielded.connect(self._update_from_saving)
             self.save_worker.start()
 
@@ -271,7 +258,7 @@ class TrainPlugin(QWidget):
                     "information. Note: if you get an error due to the sizes of "
                     "Tensors, try using tiling."
                 )
-            
+
         else:
             if update.type == PredictionUpdateType.SAMPLE:
                 # add image to napari
@@ -286,15 +273,13 @@ class TrainPlugin(QWidget):
             print(update.value)
         elif update.type == SavingUpdateType.EXCEPTION:
             self.save_status.state = SavingState.CRASHED
-            
+
             # print exception without raising it
             print(f"Error: {update.value}")
 
             if _has_napari:
-                ntf.show_error(
-                    "An error occurred during saving."
-                )
-            
+                ntf.show_error("An error occurred during saving.")
+
     def _set_data_from_algorithm(self, name: str) -> None:
         """Set the data selection widget based on the algorithm."""
         if (
@@ -329,9 +314,9 @@ if __name__ == "__main__":
 
     import napari
 
-    log_file_fd=open("fault_log.txt", "a")
+    log_file_fd = open("fault_log.txt", "a")
     faulthandler.enable(log_file_fd)
-    
+
     # create a Viewer
     viewer = napari.Viewer()
 

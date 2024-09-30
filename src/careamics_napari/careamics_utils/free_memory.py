@@ -1,11 +1,19 @@
+"""Utility to free GPU memory."""
+
 import gc
 
-from torch.cuda import empty_cache
 from careamics import CAREamist
+from torch.cuda import empty_cache
 
 
 def free_memory(careamist: CAREamist) -> None:
-    """Free memory from CAREamics instance."""
+    """Free memory from CAREamics instance.
+
+    Parameters
+    ----------
+    careamist : CAREamist
+        CAREamics instance.
+    """
     if careamist is not None:
         careamist.trainer.model.cpu()
         del careamist.trainer.model

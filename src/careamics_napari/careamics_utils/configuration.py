@@ -1,19 +1,35 @@
-
+"""Utility to create CAREamics configurations from user-set settings."""
 
 from careamics import Configuration
 from careamics.config import (
     create_care_configuration,
     create_n2n_configuration,
-    create_n2v_configuration
+    create_n2v_configuration,
 )
-from careamics.config.transformations import XYFlipModel, XYRandomRotate90Model
 from careamics.config.support import SupportedAlgorithm
+from careamics.config.transformations import XYFlipModel, XYRandomRotate90Model
 
 from careamics_napari.signals import TrainingSignal
 
 
 def create_configuration(signal: TrainingSignal) -> Configuration:
-    
+    """Create a CAREamics configuration from a TrainingSignal.
+
+    Parameters
+    ----------
+    signal : TrainingSignal
+        Signal containing user-set training parameters.
+
+    Returns
+    -------
+    Configuration
+        CAREamics configuration.
+
+    Raises
+    ------
+    ValueError
+        If the algorithm is not supported.
+    """
     # experiment name
     if signal.experiment_name == "":
         experiment_name = f"{signal.algorithm}_{signal.axes}"
@@ -28,13 +44,13 @@ def create_configuration(signal: TrainingSignal) -> Configuration:
     # model params
     model_params = {
         "depth": signal.depth,
-        "num_channels_init": signal.size_conv_filters,
+        "num_channels_init": signal.num_conv_filters,
     }
 
     # augmentations
     augs = []
     if signal.x_flip or signal.y_flip:
-        augs.append(XYFlipModel(flip_x = signal.x_flip, flip_y = signal.y_flip))
+        augs.append(XYFlipModel(flip_x=signal.x_flip, flip_y=signal.y_flip))
 
     if signal.rotations:
         augs.append(XYRandomRotate90Model())

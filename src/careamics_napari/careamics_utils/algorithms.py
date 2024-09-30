@@ -1,7 +1,10 @@
+"""Utilities for handling algorithms shorthand and friendly names."""
 
 from careamics.config.support import SupportedAlgorithm
 
 UNSUPPORTED = "I would prefer not to."
+"""Label for algorithm not currently supported in the napari plugin."""
+
 
 def get_available_algorithms() -> list[str]:
     """Return the available algorithms friendly names.
@@ -12,13 +15,16 @@ def get_available_algorithms() -> list[str]:
         A list of available algorithms.
     """
     return [
-        get_friendly_name(algorithm) for algorithm in SupportedAlgorithm
+        get_friendly_name(algorithm)
+        for algorithm in SupportedAlgorithm
         if get_friendly_name(algorithm) != UNSUPPORTED
-    ] 
+    ]
 
 
 def get_friendly_name(algorithm: SupportedAlgorithm) -> str:
     """Return the friendly name of an algorithm.
+
+    Friendly names are spelling out the algorithm names in a human-readable way.
 
     Parameters
     ----------
@@ -38,10 +44,13 @@ def get_friendly_name(algorithm: SupportedAlgorithm) -> str:
         return "Noise2Noise"
     else:
         return UNSUPPORTED
-    
+
 
 def get_algorithm(friendly_name: str) -> str:
     """Return the algorithm corresponding to the friendly name.
+
+    The string returned by this method can directly be used with CAREamics
+    configuration.
 
     Parameters
     ----------

@@ -1,31 +1,28 @@
 """A widget allowing setting advanced settings."""
 
 from typing import Optional
-from typing_extensions import Self
-
-from qtpy.QtCore import Qt
-from qtpy.QtWidgets import (
-    QGroupBox,
-    QVBoxLayout,
-    QStackedWidget,
-    QFormLayout,
-    QCheckBox,
-    QDialog,
-    QLineEdit,
-    QWidget,
-    QPushButton,
-)
 
 from careamics.config.support import SupportedAlgorithm
+from qtpy.QtCore import Qt
+from qtpy.QtWidgets import (
+    QCheckBox,
+    QDialog,
+    QFormLayout,
+    QGroupBox,
+    QLineEdit,
+    QPushButton,
+    QStackedWidget,
+    QVBoxLayout,
+    QWidget,
+)
 
 from careamics_napari.signals import TrainingSignal
 from careamics_napari.widgets import create_int_spinbox
 
-
-
 # TODO missing:
 # structn2v
 # n2v masking parameters
+
 
 # TODO should it be a singleton to make sure there only a single instance at a time?
 # TODO add checkpointing parameters
@@ -35,7 +32,7 @@ class AdvancedConfigurationWindow(QDialog):
 
     def __init__(self, parent: QWidget, signal: Optional[TrainingSignal] = None):
         super().__init__(parent)
-        
+
         self.configuration_signal = signal
 
         self.setLayout(QVBoxLayout())
@@ -44,7 +41,7 @@ class AdvancedConfigurationWindow(QDialog):
         # experiment name text box
         experiment_widget = QWidget()
         experiment_layout = QFormLayout()
-        
+
         self.experiment_name = QLineEdit()
         self.experiment_name.setToolTip(
             "Name of the experiment. It will be used to save the model\n"
@@ -62,15 +59,13 @@ class AdvancedConfigurationWindow(QDialog):
 
         self.x_flip = QCheckBox("X Flip")
         self.x_flip.setToolTip(
-            "Check to add augmentation that flips the image\n"
-            "along the x-axis"
+            "Check to add augmentation that flips the image\n" "along the x-axis"
         )
         self.x_flip.setChecked(self.configuration_signal.x_flip)
 
         self.y_flip = QCheckBox("Y Flip")
         self.y_flip.setToolTip(
-            "Check to add augmentation that flips the image\n"
-            "along the y-axis"
+            "Check to add augmentation that flips the image\n" "along the y-axis"
         )
         self.y_flip.setChecked(self.configuration_signal.y_flip)
 
@@ -80,13 +75,13 @@ class AdvancedConfigurationWindow(QDialog):
             "in 90 degree increments in XY"
         )
         self.rotations.setChecked(self.configuration_signal.rotations)
-        
+
         augmentations_layout.addRow(self.x_flip)
         augmentations_layout.addRow(self.y_flip)
         augmentations_layout.addRow(self.rotations)
         augmentations.setLayout(augmentations_layout)
         self.layout().addWidget(augmentations)
-        
+
         ##################
         # channels
         self.channels = QGroupBox("Channels")
@@ -97,8 +92,7 @@ class AdvancedConfigurationWindow(QDialog):
 
         self.independent_channels = QCheckBox("Independent")
         self.independent_channels.setToolTip(
-            "Check to treat the channels independently during\n"
-            "training."
+            "Check to treat the channels independently during\n" "training."
         )
         self.independent_channels.setChecked(
             self.configuration_signal.independent_channels
@@ -114,10 +108,8 @@ class AdvancedConfigurationWindow(QDialog):
         self.n_channels = create_int_spinbox(
             1, 10, self.configuration_signal.n_channels_n2v, 1
         )
-        self.n_channels.setToolTip(
-            "Number of channels in the input images"
-        )
-        
+        self.n_channels.setToolTip("Number of channels in the input images")
+
         n2v_channels_widget_layout.addRow("Channels", self.n_channels)
         n2v_channels_widget.setLayout(n2v_channels_widget_layout)
 
@@ -131,7 +123,7 @@ class AdvancedConfigurationWindow(QDialog):
         self.n_channels_out = create_int_spinbox(
             1, 10, self.configuration_signal.n_channels_out_care, 1
         )
-        
+
         care_channels_widget_layout.addRow("Channels in", self.n_channels_in)
         care_channels_widget_layout.addRow("Channels out", self.n_channels_out)
         care_channels_widget.setLayout(care_channels_widget_layout)
@@ -152,9 +144,7 @@ class AdvancedConfigurationWindow(QDialog):
         n2v2_layout = QFormLayout()
 
         self.use_n2v2 = QCheckBox("Use N2V2")
-        self.use_n2v2.setToolTip(
-            "Check to use N2V2 for training."
-        )
+        self.use_n2v2.setToolTip("Check to use N2V2 for training.")
         self.use_n2v2.setChecked(self.configuration_signal.use_n2v2)
 
         n2v2_layout.addRow(self.use_n2v2)
@@ -166,14 +156,10 @@ class AdvancedConfigurationWindow(QDialog):
         model_params = QGroupBox("UNet parameters")
         model_params_layout = QFormLayout()
 
-        self.model_depth = create_int_spinbox(
-            2, 5, self.configuration_signal.depth, 1
-        )
-        self.model_depth.setToolTip(
-            "Depth of the U-Net model."
-        )
+        self.model_depth = create_int_spinbox(2, 5, self.configuration_signal.depth, 1)
+        self.model_depth.setToolTip("Depth of the U-Net model.")
         self.size_conv_filters = create_int_spinbox(
-            8, 1024, self.configuration_signal.size_conv_filters, 8, 8
+            8, 1024, self.configuration_signal.num_conv_filters, 8, 8
         )
         self.size_conv_filters.setToolTip(
             "Number of convolutional filters in the first layer."
@@ -204,7 +190,9 @@ class AdvancedConfigurationWindow(QDialog):
             )
             self._update_to_channels(self.configuration_signal.use_channels)
 
-            self.configuration_signal.events.algorithm.connect(self._update_to_algorithm)
+            self.configuration_signal.events.algorithm.connect(
+                self._update_to_algorithm
+            )
             self._update_to_algorithm(self.configuration_signal.algorithm)
 
     def _update_to_algorithm(self, name: str) -> None:
@@ -214,7 +202,6 @@ class AdvancedConfigurationWindow(QDialog):
         else:
             self.n2v2_widget.setVisible(False)
             self.channels_stack.setCurrentIndex(1)
-
 
     def _update_to_channels(self, use_channels: bool) -> None:
         self.channels.setVisible(use_channels)
@@ -235,15 +222,15 @@ class AdvancedConfigurationWindow(QDialog):
             self.configuration_signal.n_channels_out_care = self.n_channels_out.value()
             self.configuration_signal.use_n2v2 = self.use_n2v2.isChecked()
             self.configuration_signal.depth = self.model_depth.value()
-            self.configuration_signal.size_conv_filters = self.size_conv_filters.value()
+            self.configuration_signal.num_conv_filters = self.size_conv_filters.value()
 
         self.close()
-    
 
 
 if __name__ == "__main__":
-    from qtpy.QtWidgets import QApplication
     import sys
+
+    from qtpy.QtWidgets import QApplication
 
     # Create a QApplication instance
     app = QApplication(sys.argv)

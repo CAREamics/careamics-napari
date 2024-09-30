@@ -1,11 +1,14 @@
-import os
+"""Utilities to check axes validity."""
 
 import warnings
-
 from itertools import permutations
 
-REF_AXES = 'TSZYXC'
-NAPARI_AXES = 'TSZYXC' # TODO is this still true?
+REF_AXES = "STCZYX"
+"""References axes in CAREamics."""
+
+NAPARI_AXES = "TSZYXC"  # TODO is this still true?
+"""Axes used in Napari."""
+
 
 def filter_dimensions(shape_length: int, is_3D: bool) -> list[str]:
     """Filter axes based on shape and dimensions.
@@ -26,22 +29,22 @@ def filter_dimensions(shape_length: int, is_3D: bool) -> list[str]:
     n = shape_length
 
     if not is_3D:  # if not 3D, remove it from the
-        axes.remove('Z')
+        axes.remove("Z")
 
     if n > len(axes):
-        warnings.warn('Data shape length is too large.')
+        warnings.warn("Data shape length is too large.")
         return []
     else:
-        all_permutations = [''.join(p) for p in permutations(axes, n)]
+        all_permutations = ["".join(p) for p in permutations(axes, n)]
 
         # X and Y must be in each permutation and contiguous (#FancyComments)
-        all_permutations = [p for p in all_permutations if ('XY' in p) or ('YX' in p)]
+        all_permutations = [p for p in all_permutations if ("XY" in p) or ("YX" in p)]
 
         if is_3D:
-            all_permutations = [p for p in all_permutations if 'Z' in p]
+            all_permutations = [p for p in all_permutations if "Z" in p]
 
         if len(all_permutations) == 0 and not is_3D:
-            all_permutations = ['YX']
+            all_permutations = ["YX"]
 
         return all_permutations
 
@@ -76,4 +79,4 @@ def are_axes_valid(axes: str) -> bool:
             return False
 
     # prior: X and Y contiguous
-    return ('XY' in _axes) or ('YX' in _axes)
+    return ("XY" in _axes) or ("YX" in _axes)
