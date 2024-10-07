@@ -37,7 +37,11 @@ def create_configuration(signal: TrainingSignal) -> Configuration:
         experiment_name = signal.experiment_name
 
     if signal.is_3d:
-        patches = (signal.patch_size_xy, signal.patch_size_xy, signal.patch_size_z)
+        patches: tuple[int, ...] = (
+            signal.patch_size_xy,
+            signal.patch_size_xy,
+            signal.patch_size_z,
+        )
     else:
         patches = (signal.patch_size_xy, signal.patch_size_xy)
 

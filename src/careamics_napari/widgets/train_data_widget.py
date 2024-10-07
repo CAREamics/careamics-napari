@@ -1,3 +1,5 @@
+"""A widget allowing users to select data source for the training."""
+
 from typing import TYPE_CHECKING, Optional
 
 from qtpy.QtWidgets import (
@@ -34,14 +36,14 @@ class TrainDataWidget(QTabWidget):
         signal: Optional[TrainingSignal] = None,
         use_target: bool = False,
     ) -> None:
-        """Constructor.
+        """Initialize the widget.
 
         Parameters
         ----------
-        signal : TrainConfigurationSignal, default=None
-            Signal to be updated with changed in widgets values.
+        signal : TrainConfigurationSignal or None, default=None
+            Signal representing the training parameters.
         use_target : bool, default=False
-            Use train and validation target fields.
+            Whether to target fields.
         """
         super().__init__()
         self.config_signal = signal
@@ -71,9 +73,16 @@ class TrainDataWidget(QTabWidget):
             self._set_data_source(self.currentIndex())
 
     def _set_layer_tab(
-        self,
+        self: Self,
         layer_tab: QWidget,
     ) -> None:
+        """Set up the layer tab.
+
+        Parameters
+        ----------
+        layer_tab : QWidget
+            Layer tab widget.
+        """
         if _has_napari and napari.current_viewer() is not None:
             widget_layers = QWidget()
             widget_layers.setLayout(QFormLayout())
@@ -117,7 +126,14 @@ class TrainDataWidget(QTabWidget):
             # simply remove the tab
             self.removeTab(0)
 
-    def _set_disk_tab(self, disk_tab: QWidget) -> None:
+    def _set_disk_tab(self: Self, disk_tab: QWidget) -> None:
+        """Set up the disk tab.
+
+        Parameters
+        ----------
+        disk_tab : QWidget
+            Disk tab widget.
+        """
         # disk tab
         buttons = QWidget()
         form = QFormLayout()
@@ -179,33 +195,104 @@ class TrainDataWidget(QTabWidget):
         buttons.setLayout(form)
         disk_tab.layout().addWidget(buttons)
 
-    def _set_data_source(self, index: int) -> None:
+    def _set_data_source(self: Self, index: int) -> None:
+        """Set the signal data source to the selected tab.
+
+        Parameters
+        ----------
+        index : int
+            Index of the selected tab.
+        """
         if self.config_signal is not None:
             self.config_signal.load_from_disk = index == self.count() - 1
 
-    def _update_train_layer(self, layer: Image) -> None:
-        self.config_signal.layer_train = layer
+    def _update_train_layer(self: Self, layer: Image) -> None:
+        """Update the training layer.
 
-    def _update_val_layer(self, layer: Image) -> None:
-        self.config_signal.layer_val = layer
+        Parameters
+        ----------
+        layer : Image
+            Training layer.
+        """
+        if self.config_signal is not None:
+            self.config_signal.layer_train = layer
 
-    def _update_train_target_layer(self, layer: Image) -> None:
-        self.config_signal.layer_train_target = layer
+    def _update_val_layer(self: Self, layer: Image) -> None:
+        """Update the validation layer.
 
-    def _update_val_target_layer(self, layer: Image) -> None:
-        self.config_signal.layer_val_target = layer
+        Parameters
+        ----------
+        layer : Image
+            Validation layer.
+        """
+        if self.config_signal is not None:
+            self.config_signal.layer_val = layer
 
-    def _update_train_folder(self, folder: str) -> None:
-        self.config_signal.path_train = folder
+    def _update_train_target_layer(self: Self, layer: Image) -> None:
+        """Update the training target layer.
 
-    def _update_val_folder(self, folder: str) -> None:
-        self.config_signal.path_val = folder
+        Parameters
+        ----------
+        layer : Image
+            Training target layer.
+        """
+        if self.config_signal is not None:
+            self.config_signal.layer_train_target = layer
 
-    def _update_train_target_folder(self, folder: str) -> None:
-        self.config_signal.path_train_target = folder
+    def _update_val_target_layer(self: Self, layer: Image) -> None:
+        """Update the validation target layer.
 
-    def _update_val_target_folder(self, folder: str) -> None:
-        self.config_signal.path_val_target = folder
+        Parameters
+        ----------
+        layer : Image
+            Validation target layer.
+        """
+        if self.config_signal is not None:
+            self.config_signal.layer_val_target = layer
+
+    def _update_train_folder(self: Self, folder: str) -> None:
+        """Update the training folder.
+
+        Parameters
+        ----------
+        folder : str
+            Training folder.
+        """
+        if self.config_signal is not None:
+            self.config_signal.path_train = folder
+
+    def _update_val_folder(self: Self, folder: str) -> None:
+        """Update the validation folder.
+
+        Parameters
+        ----------
+        folder : str
+            Validation folder.
+        """
+        if self.config_signal is not None:
+            self.config_signal.path_val = folder
+
+    def _update_train_target_folder(self: Self, folder: str) -> None:
+        """Update the training target folder.
+
+        Parameters
+        ----------
+        folder : str
+            Training target folder.
+        """
+        if self.config_signal is not None:
+            self.config_signal.path_train_target = folder
+
+    def _update_val_target_folder(self: Self, folder: str) -> None:
+        """Update the validation target folder.
+
+        Parameters
+        ----------
+        folder : str
+            Validation target folder.
+        """
+        if self.config_signal is not None:
+            self.config_signal.path_val_target = folder
 
 
 if __name__ == "__main__":
@@ -233,7 +320,9 @@ if __name__ == "__main__":
     viewer = napari.Viewer()
 
     # add napari-n2v plugin
-    viewer.window.add_dock_widget(TrainDataWidget(TrainingSignal(), True))
+    viewer.window.add_dock_widget(
+        TrainDataWidget(TrainingSignal(), True)  # type: ignore
+    )
 
     # add image to napari
     # viewer.add_image(data[0][0], name=data[0][1]['name'])

@@ -1,3 +1,5 @@
+"""Magicgui widgets."""
+
 from pathlib import Path
 from typing import Any, Optional
 
@@ -12,7 +14,6 @@ except ImportError:
     _has_napari = False
 else:
     _has_napari = True
-
 
 
 def layer_choice(annotation: Optional[Any] = Image, **kwargs: Any) -> Widget:
@@ -43,13 +44,14 @@ def layer_choice(annotation: Optional[Any] = Image, **kwargs: Any) -> Widget:
     widget: Widget = create_widget(annotation=annotation, **kwargs)
     widget.reset_choices()
     viewer = current_viewer()
-    
+
     # connect to napari events
     viewer.layers.events.inserted.connect(widget.reset_choices)
     viewer.layers.events.removed.connect(widget.reset_choices)
     viewer.layers.events.changed.connect(widget.reset_choices)
 
     return widget
+
 
 @magic_factory(auto_call=True, Model={"mode": "r", "filter": "*.ckpt *.zip"})
 def load_button(Model: Path):

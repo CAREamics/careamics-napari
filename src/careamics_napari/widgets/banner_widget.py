@@ -1,20 +1,17 @@
 """A banner widget with CAREamics logo, and links to Github and documentation."""
 
 import webbrowser
-from typing import Any
-from typing_extensions import Self
+from typing import Any, Callable
 
-from qtpy import QtCore, QtGui
+from qtpy import QtCore
 from qtpy.QtGui import QCursor, QFont, QPixmap
 from qtpy.QtWidgets import QHBoxLayout, QLabel, QPlainTextEdit, QVBoxLayout, QWidget
+from typing_extensions import Self
 
-from careamics_napari.resources import ICON_GITHUB, ICON_CAREAMICS
+from careamics_napari.resources import ICON_CAREAMICS, ICON_GITHUB
 
-DOC_LINK = 'https://careamics.github.io',
-"""Link to the CAREamics documentation."""
-
-GH_LINK = 'https://github.com/CAREamics/careamics-napari/issues'
-"""Link to the CAREamics UI Github repository issues."""
+DOC_LINK = "https://careamics.github.io"
+GH_LINK = "https://github.com/CAREamics/careamics-napari/issues"
 
 
 def _create_link(link: str, text: str) -> QLabel:
@@ -47,27 +44,32 @@ def _create_link(link: str, text: str) -> QLabel:
     return label
 
 
-def _open_link(link: str):
+def _open_link(link: str) -> Callable:
     """Open link in browser.
 
     Parameters
     ----------
     link : str
         Link to open.
+
+    Returns
+    -------
+    Callable
+        Link opener.
     """
-    def link_opener(event: Any):
+
+    def link_opener(_: Any):
         webbrowser.open(link)
 
     return link_opener
 
 
 class CAREamicsBanner(QWidget):
-    """Banner widget with CAREamics logo, and links to Github and documentation.
-    """
+    """Banner widget with CAREamics logo, and links to Github and documentation."""
 
     def __init__(
         self: Self,
-        title_label: str,
+        title: str,
         short_desc: str,
     ) -> None:
         """Constructor.
@@ -79,9 +81,8 @@ class CAREamicsBanner(QWidget):
         short_desc : str
             Short description of the banner.
         """
-
         super().__init__()
-        
+
         self.setMinimumSize(250, 200)
 
         layout = QHBoxLayout()
@@ -102,7 +103,7 @@ class CAREamicsBanner(QWidget):
         right_widget.setLayout(right_layout)
 
         # title
-        title_label = QLabel(title_label)
+        title_label = QLabel(title)
         title_label.setStyleSheet("font-weight: bold;")
 
         # description
@@ -142,17 +143,15 @@ class CAREamicsBanner(QWidget):
 
 
 if __name__ == "__main__":
-    from qtpy.QtWidgets import QApplication
     import sys
+
+    from qtpy.QtWidgets import QApplication
 
     # Create a QApplication instance
     app = QApplication(sys.argv)
 
     # Instantiate widget
-    widget = CAREamicsBanner(
-        "Test",
-        "A test description for this widget."
-    )
+    widget = CAREamicsBanner("Test", "A test description for this widget.")
 
     # Show the widget
     widget.show()

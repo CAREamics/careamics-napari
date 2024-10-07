@@ -24,11 +24,19 @@ from careamics_napari.widgets import (
 
 
 class ConfigurationWidget(QGroupBox):
+    """A widget allowing the creation of a CAREamics configuration."""
 
-    def __init__(self, signal: Optional[TrainingSignal] = None):
+    def __init__(self: Self, training_signal: Optional[TrainingSignal] = None) -> None:
+        """Initialize the widget.
+
+        Parameters
+        ----------
+        signal : TrainingSignal or None, default=None
+            Signal containing the training parameters.
+        """
         super().__init__()
 
-        self.configuration_signal = signal
+        self.configuration_signal = training_signal
         self.config_window = None
 
         self.setTitle("Training parameters")
@@ -45,7 +53,7 @@ class ConfigurationWidget(QGroupBox):
         self.enable_3d.setToolTip("Use a 3D network")
 
         # axes
-        self.axes_widget = AxesWidget(training_signal=signal)
+        self.axes_widget = AxesWidget(training_signal=self.configuration_signal)
 
         # others
         self.n_epochs_spin = create_int_spinbox(1, 1000, 30, tooltip="Number of epochs")
@@ -63,7 +71,9 @@ class ConfigurationWidget(QGroupBox):
 
         self.patch_Z_spin = PowerOfTwoSpinBox(8, 512, 8)
         self.patch_Z_spin.setToolTip("Dimension of the patches in Z.")
-        self.patch_Z_spin.setEnabled(self.configuration_signal.is_3d)
+
+        if self.configuration_signal is not None:
+            self.patch_Z_spin.setEnabled(self.configuration_signal.is_3d)
 
         formLayout = QFormLayout()
         formLayout.addRow("Enable 3D", self.enable_3d)
@@ -92,7 +102,8 @@ class ConfigurationWidget(QGroupBox):
         self.patch_XY_spin.valueChanged.connect(self._update_patch_size_XY)
         self.patch_Z_spin.valueChanged.connect(self._update_patch_size_Z)
 
-    def _show_configuration_window(self):
+    def _show_configuration_window(self: Self) -> None:
+        """Show the advanced configuration window."""
         if self.config_window is None or self.config_window.isHidden():
             self.config_window = AdvancedConfigurationWindow(
                 self, self.configuration_signal
@@ -101,28 +112,70 @@ class ConfigurationWidget(QGroupBox):
             self.config_window.show()
 
     def _enable_3d_changed(self: Self, state: bool) -> None:
+        """Update the signal 3D state.
+
+        Parameters
+        ----------
+        state : bool
+            3D state.
+        """
         self.patch_Z_spin.setVisible(state)
 
         if self.configuration_signal is not None:
             self.configuration_signal.is_3d = state
 
     def _update_axes(self: Self, axes: str) -> None:
+        """Update the signal axes.
+
+        Parameters
+        ----------
+        axes : str
+            Axes.
+        """
         if self.configuration_signal is not None:
             self.configuration_signal.axes = axes
 
     def _update_n_epochs(self: Self, n_epochs: int) -> None:
+        """Update the signal number of epochs.
+
+        Parameters
+        ----------
+        n_epochs : int
+            Number of epochs.
+        """
         if self.configuration_signal is not None:
             self.configuration_signal.n_epochs = n_epochs
 
     def _update_batch_size(self: Self, batch_size: int) -> None:
+        """Update the signal batch size.
+
+        Parameters
+        ----------
+        batch_size : int
+            Batch size.
+        """
         if self.configuration_signal is not None:
             self.configuration_signal.batch_size = batch_size
 
     def _update_patch_size_XY(self: Self, patch_size: int) -> None:
+        """Update the signal patch size in XY.
+
+        Parameters
+        ----------
+        patch_size : int
+            Patch size.
+        """
         if self.configuration_signal is not None:
             self.configuration_signal.patch_size_xy = patch_size
 
     def _update_patch_size_Z(self: Self, patch_size: int) -> None:
+        """Update the signal patch size in Z.
+
+        Parameters
+        ----------
+        patch_size : int
+            Patch size.
+        """
         if self.configuration_signal is not None:
             self.configuration_signal.patch_size_z = patch_size
 
@@ -136,7 +189,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     # Signals
-    myalgo = TrainingSignal()
+    myalgo = TrainingSignal()  # type: ignore
 
     # Instantiate widget
     widget = ConfigurationWidget(myalgo)

@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Union
 
 
-class ExportType(str, Enum):
+class ExportType(Enum):
     """Type of model export."""
 
     BMZ = "Bioimage.io"
@@ -26,7 +26,7 @@ class ExportType(str, Enum):
         list of str
             List of all available export types.
         """
-        return list(map(lambda c: c.value, cls))
+        return [c.value for c in cls]
 
 
 @dataclass

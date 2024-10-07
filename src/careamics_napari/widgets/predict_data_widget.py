@@ -1,20 +1,17 @@
+"""A widget used to select a path or layer for prediction."""
 
 from typing import TYPE_CHECKING, Optional
-from typing_extensions import Self
 
 from qtpy.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
     QFormLayout,
     QTabWidget,
+    QVBoxLayout,
+    QWidget,
 )
-from magicgui.widgets import Container
+from typing_extensions import Self
 
-from careamics_napari.widgets import (
-    FolderWidget,
-    layer_choice
-)
 from careamics_napari.signals import PredictionSignal
+from careamics_napari.widgets import FolderWidget, layer_choice
 
 if TYPE_CHECKING:
     import napari
@@ -31,14 +28,13 @@ else:
 
 
 class PredictDataWidget(QTabWidget):
-    """A widget offering to select a layer from napari or a path from disk.
-    """
+    """A widget offering to select a layer from napari or a path from disk."""
 
     def __init__(
-            self: Self, 
-            signal: Optional[PredictionSignal] = None,
+        self: Self,
+        prediction_signal: Optional[PredictionSignal] = None,
     ) -> None:
-        """Constructor.
+        """Initialize the widget.
 
         Parameters
         ----------
@@ -46,8 +42,8 @@ class PredictDataWidget(QTabWidget):
             Signal to be updated with changed in widgets values.
         """
         super().__init__()
-        self.config_signal = signal
-            
+        self.config_signal = prediction_signal
+
         # QTabs
         layer_tab = QWidget()
         layer_tab.setLayout(QVBoxLayout())
@@ -55,10 +51,10 @@ class PredictDataWidget(QTabWidget):
         disk_tab.setLayout(QVBoxLayout())
 
         # add tabs
-        self.addTab(layer_tab, 'From layers')
-        self.addTab(disk_tab, 'From disk')
-        self.setTabToolTip(0, 'Use images from napari layers')
-        self.setTabToolTip(1, 'Use iamges saved on the disk')
+        self.addTab(layer_tab, "From layers")
+        self.addTab(disk_tab, "From disk")
+        self.setTabToolTip(0, "Use images from napari layers")
+        self.setTabToolTip(1, "Use iamges saved on the disk")
 
         # set tabs
         self._set_layer_tab(layer_tab)
@@ -70,9 +66,16 @@ class PredictDataWidget(QTabWidget):
             self._set_data_source(self.currentIndex())
 
     def _set_layer_tab(
-            self, 
-            layer_tab: QWidget, 
+        self: Self,
+        layer_tab: QWidget,
     ) -> None:
+        """Set up the layer tab.
+
+        Parameters
+        ----------
+        layer_tab : QWidget
+            The layer tab.
+        """
         if _has_napari and napari.current_viewer() is not None:
             widget_layers = QWidget()
             widget_layers.setLayout(QFormLayout())
@@ -89,19 +92,24 @@ class PredictDataWidget(QTabWidget):
             # simply remove the tab
             self.removeTab(0)
 
-    def _set_disk_tab(self, disk_tab: QWidget) -> None:
+    def _set_disk_tab(self: Self, disk_tab: QWidget) -> None:
+        """Set up the disk tab.
+
+        Parameters
+        ----------
+        disk_tab : QWidget
+            The disk tab.
+        """
         # disk tab
         buttons = QWidget()
         form = QFormLayout()
         # form.setContentsMargins(4, 0, 4, 0)
         # form.setSpacing(0)
 
-        self.pred_images_folder = FolderWidget('Choose')
-        form.addRow('Predict', self.pred_images_folder)
+        self.pred_images_folder = FolderWidget("Choose")
+        form.addRow("Predict", self.pred_images_folder)
 
-        self.pred_images_folder.setToolTip(
-            'Select a folder containing images.'
-        )
+        self.pred_images_folder.setToolTip("Select a folder containing images.")
 
         # add actions
         self.pred_images_folder.get_text_widget().textChanged.connect(
@@ -111,14 +119,35 @@ class PredictDataWidget(QTabWidget):
         buttons.setLayout(form)
         disk_tab.layout().addWidget(buttons)
 
-    def _set_data_source(self, index: int) -> None:
+    def _set_data_source(self: Self, index: int) -> None:
+        """Set the load_from_disk attribute of the signal based on the selected tab.
+
+        Parameters
+        ----------
+        index : int
+            Index of the selected tab.
+        """
         if self.config_signal is not None:
             self.config_signal.load_from_disk = index == self.count() - 1
 
-    def _update_pred_layer(self, layer: Image) -> None:
+    def _update_pred_layer(self: Self, layer: Image) -> None:
+        """Update the layer attribute of the signal.
+
+        Parameters
+        ----------
+        layer : Image
+            The selected layer.
+        """
         self.config_signal.layer_pred = layer
-    
-    def _update_pred_folder(self, folder: str) -> None:
+
+    def _update_pred_folder(self: Self, folder: str) -> None:
+        """Update the path attribute of the signal.
+
+        Parameters
+        ----------
+        folder : str
+            The selected folder.
+        """
         self.config_signal.path_pred = folder
 
 
@@ -142,15 +171,12 @@ if __name__ == "__main__":
     # sys.exit(app.exec_())
 
     import napari
+
     # create a Viewer
     viewer = napari.Viewer()
 
     # add napari-n2v plugin
-    viewer.window.add_dock_widget(
-        PredictDataWidget(
-            PredictionSignal()
-        )
-    )
+    viewer.window.add_dock_widget(PredictDataWidget(PredictionSignal()))
 
     # add image to napari
     # viewer.add_image(data[0][0], name=data[0][1]['name'])

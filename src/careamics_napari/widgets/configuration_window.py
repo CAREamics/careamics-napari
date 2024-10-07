@@ -1,4 +1,4 @@
-"""A widget allowing setting advanced settings."""
+"""A dialog widget allowing modifying advanced settings."""
 
 from typing import Optional
 
@@ -15,6 +15,7 @@ from qtpy.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+from typing_extensions import Self
 
 from careamics_napari.signals import TrainingSignal
 from careamics_napari.widgets import create_int_spinbox
@@ -29,11 +30,23 @@ from careamics_napari.widgets import create_int_spinbox
 # TODO add minimum percentage and minimum val data
 # TODO add default values from the configuration_signal
 class AdvancedConfigurationWindow(QDialog):
+    """A dialog widget allowing modifying advanced settings."""
 
-    def __init__(self, parent: QWidget, signal: Optional[TrainingSignal] = None):
+    def __init__(
+        self, parent: QWidget, training_signal: Optional[TrainingSignal] = None
+    ) -> None:
+        """Initialize the widget.
+
+        Parameters
+        ----------
+        parent : QWidget
+            Parent widget.
+        training_signal : TrainingSignal or None, default=None
+            Signal used to update the parameters set by the user.
+        """
         super().__init__(parent)
 
-        self.configuration_signal = signal
+        self.configuration_signal = training_signal
 
         self.setLayout(QVBoxLayout())
 
@@ -195,7 +208,16 @@ class AdvancedConfigurationWindow(QDialog):
             )
             self._update_to_algorithm(self.configuration_signal.algorithm)
 
-    def _update_to_algorithm(self, name: str) -> None:
+    def _update_to_algorithm(self: Self, name: str) -> None:
+        """Update the widget to the selected algorithm.
+
+        If Noise2Void is selected, the widget will show the N2V2 parameters.
+
+        Parameters
+        ----------
+        name : str
+            Name of the selected algorithm, as defined in SupportedAlgorithm.
+        """
         if name == SupportedAlgorithm.N2V.value:
             self.n2v2_widget.setVisible(True)
             self.channels_stack.setCurrentIndex(0)
@@ -203,11 +225,18 @@ class AdvancedConfigurationWindow(QDialog):
             self.n2v2_widget.setVisible(False)
             self.channels_stack.setCurrentIndex(1)
 
-    def _update_to_channels(self, use_channels: bool) -> None:
+    def _update_to_channels(self: Self, use_channels: bool) -> None:
+        """Update the widget to show the channels parameters.
+
+        Parameters
+        ----------
+        use_channels : bool
+            Whether to show the channels parameters.
+        """
         self.channels.setVisible(use_channels)
 
-    def _save(self) -> None:
-        """Save the configuration."""
+    def _save(self: Self) -> None:
+        """Save the parameters and close the dialog."""
         # Update the parameters
         if self.configuration_signal is not None:
             self.configuration_signal.experiment_name = self.experiment_name.text()
@@ -239,7 +268,7 @@ if __name__ == "__main__":
     myalgo = TrainingSignal(use_channels=False)
 
     # Instantiate widget
-    widget = AdvancedConfigurationWindow(signal=myalgo)
+    widget = AdvancedConfigurationWindow(training_signal=myalgo)
 
     # Show the widget
     widget.show()

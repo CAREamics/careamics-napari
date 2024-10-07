@@ -61,10 +61,11 @@ if __name__ == "__main__":
 
     from qtpy.QtWidgets import QApplication
 
-    myalgo = TrainingSignal()
+    myalgo = TrainingSignal()  # typing: ignore
 
     @myalgo.events.name.connect
     def print_algorithm(name: str):
+        """Print the selected algorithm."""
         print(f"Selected algorithm: {name}")
 
     # Create a QApplication instance

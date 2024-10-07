@@ -1,33 +1,59 @@
+"""A widget displaying losses and a button to open TensorBoard in the browser."""
+
 import webbrowser
-from typing import Optional
+from typing import Any, Optional
 
 import pyqtgraph as pg
 from magicgui.widgets import Container
 from qtpy.QtCore import QSize, Qt
 from qtpy.QtGui import QCursor, QIcon, QPixmap
 from qtpy.QtWidgets import QHBoxLayout, QLabel, QPushButton, QWidget
+from typing_extensions import Self
 
 from careamics_napari.resources import ICON_TF
 from careamics_napari.signals import TrainingSignal
 
 
+# TODO why is it a magicgui container and not just a widget?
 class TBPlotWidget(Container):
-    """
-    Widget used to display training graph including training and validation losses. The widget also includes a button
-    to open TensorBoard in the browser.
-    """
+    """A widget displaying losses and a button to open TensorBoard in the browser."""
 
-    def __setitem__(self, key, value):
+    # TODO what is this method used for?
+    def __setitem__(self: Self, key: Any, value: Any) -> None:
+        """Ignore set item.
+
+        Parameters
+        ----------
+        key : Any
+            Ignored.
+        value : Any
+            Ignored.
+        """
         pass
 
     def __init__(
-        self,
-        min_width: int = None,
-        min_height: int = None,
-        max_width: int = None,
-        max_height: int = None,
+        self: Self,
+        min_width: Optional[int] = None,
+        min_height: Optional[int] = None,
+        max_width: Optional[int] = None,
+        max_height: Optional[int] = None,
         train_signal: Optional[TrainingSignal] = None,
     ):
+        """Initialize the widget.
+
+        Parameters
+        ----------
+        min_width : int or None, default=None
+            Minimum width of the widget.
+        min_height : int or None, default=None
+            Minimum height of the widget.
+        max_width : int or None, default=None
+            Maximum width of the widget.
+        max_height : int or None, default=None
+            Maximum height of the widget.
+        train_signal : TrainingSignal or None, default=None
+            Signal containing training parameters.
+        """
         super().__init__()
 
         self.train_signal = train_signal
@@ -74,15 +100,17 @@ class TBPlotWidget(Container):
         self.url = None
         self.tb = None
 
-    def stop_tb(self):
-        # haven't found any good way to stop the tb process, there's currently no API for it
+    def stop_tb(self: Self) -> None:
+        """Stop the TensorBoard process.
+
+        Currently not implemented.
+        """
+        # haven't found any good way to stop the tb process, there's currently no API
+        # for it
         pass
 
-    def open_tb(self):
-        """
-        Open TensorBoard in the browser.
-        :return:
-        """
+    def open_tb(self: Self) -> None:
+        """Open TensorBoard in the browser."""
         if not self.tb:
             from tensorboard import program
 
@@ -96,14 +124,17 @@ class TBPlotWidget(Container):
         else:
             webbrowser.open(self.url)
 
-    def update_plot(self, epoch, train_loss, val_loss):
-        """
-        Add a new point to the graph.
+    def update_plot(self: Self, epoch: int, train_loss: float, val_loss: float) -> None:
+        """Update the plot with new data.
 
-        :param epoch: Epoch number, x-axis
-        :param train_loss: Training loss at the end of `epoch`
-        :param val_loss: Validation loss at the end of `epoch`
-        :return:
+        Parameters
+        ----------
+        epoch : int
+            Epoch number.
+        train_loss : float
+            Training loss.
+        val_loss : float
+            Validation loss.
         """
         # clear the plot
         self.plot.clear()
@@ -131,11 +162,8 @@ class TBPlotWidget(Container):
             name="Val",
         )
 
-    def clear_plot(self):
-        """
-        Clear the plot.
-        :return:
-        """
+    def clear_plot(self: Self) -> None:
+        """Clear the plot."""
         self.plot.clear()
         self.epochs = []
         self.train_loss = []

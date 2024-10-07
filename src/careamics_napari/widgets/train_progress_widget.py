@@ -1,3 +1,5 @@
+"""A widget displaying the training progress using two progress bars."""
+
 from typing import Optional
 
 from qtpy.QtWidgets import (
@@ -11,15 +13,29 @@ from careamics_napari.widgets import TBPlotWidget, create_progressbar
 
 
 class TrainProgressWidget(QGroupBox):
+    """A widget displaying the training progress using two progress bars."""
 
     def __init__(
         self: Self,
         train_status: Optional[TrainingStatus] = None,
         train_config: Optional[TrainingSignal] = None,
     ) -> None:
+        """Initialize the widget.
+
+        Parameters
+        ----------
+        train_status : TrainingStatus or None, default=None
+            Signal representing the training status.
+        train_config : TrainingSignal or None, default=None
+            Signal representing the training parameters.
+        """
         super().__init__()
 
-        self.train_status = train_status
+        self.train_status = (
+            train_status
+            if train_status is not None  # for typing purposes
+            else TrainingStatus()  # type: ignore
+        )
 
         self.setTitle("Training progress")
         self.setLayout(QVBoxLayout())
@@ -58,27 +74,59 @@ class TrainProgressWidget(QGroupBox):
             self.train_status.events.max_batches.connect(self._update_max_batch)
             self.train_status.events.val_loss.connect(self._update_loss)
 
-    def _update_training_state(self, state: TrainingState):
+    def _update_training_state(self: Self, state: TrainingState) -> None:
+        """Update the widget according to the training state.
+
+        Parameters
+        ----------
+        state : TrainingState
+            Training state.
+        """
         if state == TrainingState.IDLE or state == TrainingState.TRAINING:
             self.plot.clear()
 
-    def _update_max_epoch(self, max_epoch: int):
+    def _update_max_epoch(self: Self, max_epoch: int):
+        """Update the maximum number of epochs in the progress bar.
+
+        Parameters
+        ----------
+        max_epoch : int
+            Maximum number of epochs.
+        """
         self.pb_epochs.setMaximum(max_epoch)
 
-    def _update_epoch(self, epoch: int):
+    def _update_epoch(self: Self, epoch: int) -> None:
+        """Update the epoch progress bar.
+
+        Parameters
+        ----------
+        self : Self
+            _description_
+        epoch : int
+            _description_
+        """
         self.pb_epochs.setValue(epoch + 1)
         self.pb_epochs.setFormat(f"Epoch {epoch+1}/{self.train_status.max_epochs}")
 
-    def _update_max_batch(self):
-        self.pb_batch.setMaximum(self.train_status.max_batches)
+    def _update_max_batch(self: Self, max_batches: int) -> None:
+        """Update the maximum number of batches in the progress bar.
 
-    def _update_batch(self):
+        Parameters
+        ----------
+        max_batches : int
+            Maximum number of batches.
+        """
+        self.pb_batch.setMaximum(max_batches)
+
+    def _update_batch(self: Self) -> None:
+        """Update the batch progress bar."""
         self.pb_batch.setValue(self.train_status.batch_idx + 1)
         self.pb_batch.setFormat(
             f"Batch {self.train_status.batch_idx+1}/{self.train_status.max_batches}"
         )
 
-    def _update_loss(self):
+    def _update_loss(self: Self) -> None:
+        """Update the loss plot."""
         self.plot.update_plot(
             epoch=self.train_status.epoch_idx,
             train_loss=self.train_status.loss,
@@ -95,7 +143,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     # create signal
-    signal = TrainingStatus()
+    signal = TrainingStatus()  # type: ignore
 
     # Instantiate widget
     widget = TrainProgressWidget(signal)
