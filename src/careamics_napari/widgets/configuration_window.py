@@ -18,7 +18,8 @@ from qtpy.QtWidgets import (
 from typing_extensions import Self
 
 from careamics_napari.signals import TrainingSignal
-from careamics_napari.widgets import create_int_spinbox
+
+from .qt_widgets import create_int_spinbox
 
 # TODO missing:
 # structn2v

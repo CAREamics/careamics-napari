@@ -22,9 +22,10 @@ from careamics_napari.signals import (
     TrainingState,
     TrainingStatus,
 )
-from careamics_napari.widgets import (
+
+from .predict_data_widget import PredictDataWidget
+from .qt_widgets import (
     PowerOfTwoSpinBox,
-    PredictDataWidget,
     create_progressbar,
 )
 

@@ -110,7 +110,7 @@ class TrainPlugin(QWidget):
         # add banner
         self.layout().addWidget(
             CAREamicsBanner(
-                title_label="CAREamics",
+                title="CAREamics",
                 short_desc=("CAREamics UI for training denoising models."),
             )
         )
