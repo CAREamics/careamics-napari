@@ -29,6 +29,8 @@ in one package, while providing a simple and consistent API. The library relies 
 PyTorch Lightning as a back-end. In addition, we will provide extensive documentation and
 tutorials on how to best apply these methods in a scientific context.
 
+This package provide a plugin for the [napari](https://napari.org/) viewer.
+
 ## Installation and use
 
 Check out the [documentation](https://careamics.github.io/) for installation instructions and guides!
