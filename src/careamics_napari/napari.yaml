@@ -5,13 +5,25 @@ contributions:
     - id: careamics-napari.make_train_widget
       python_name: careamics_napari.training_plugin:TrainPluginWrapper
       title: Train CAREamics
-    - id: careamics-napari.data_SEM
+    - id: careamics-napari.data_SEM_N2V
       python_name: careamics_napari.sample_data:n2v_sem_data
       title: Noise2Void SEM
+    - id: careamics-napari.data_SEM_N2N
+      python_name: careamics_napari.sample_data:n2n_sem_data
+      title: Noise2Noise SEM
+    - id: careamics-napari.data_U2OS_CARE
+      python_name: careamics_napari.sample_data:care_u2os_data
+      title: CARE U2OS
   widgets:
     - command: careamics-napari.make_train_widget
       display_name: Train CAREamics
   sample_data:
-    - command: careamics-napari.data_SEM
-      display_name: Download data (SEM)
+    - command: careamics-napari.data_SEM_N2V
+      display_name: Download data for N2V (SEM)
       key: careamics_n2v_SEM
+    - command: careamics-napari.data_SEM_N2N
+      display_name: Download data for N2N (SEM)
+      key: careamics_n2n_SEM
+    - command: careamics-napari.data_U2OS_CARE
+      display_name: Download data for CARE (U2OS)
+      key: careamics_care_U2OS
