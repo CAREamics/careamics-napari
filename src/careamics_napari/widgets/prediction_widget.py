@@ -31,7 +31,19 @@ from .qt_widgets import (
 
 
 class PredictionWidget(QGroupBox):
-    """A widget to run prediction on images from within the Training plugin."""
+    """A widget to run prediction on images from within the Training plugin.
+
+    Parameters
+    ----------
+    train_status : TrainingStatus or None, default=None
+        The training status signal.
+    pred_status : PredictionStatus or None, default=None
+        The prediction status signal.
+    train_config_signal : TrainingSignal or None, default=None
+        The training configuration signal.
+    pred_config_signal : PredictionSignal or None, default=None
+        The prediction configuration signal.
+    """
 
     def __init__(
         self: Self,

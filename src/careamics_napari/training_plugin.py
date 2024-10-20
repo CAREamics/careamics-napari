@@ -67,15 +67,45 @@ else:
 
 
 class TrainPluginWrapper(ScrollWidgetWrapper):
+    """Training plugin within a scrolling wrapper.
+
+    Parameters
+    ----------
+    napari_viewer : napari.Viewer or None, default=None
+        Napari viewer.
+    """
+
     def __init__(self: Self, napari_viewer: Optional[napari.Viewer] = None) -> None:
+        """Initialize the plugin.
+
+        Parameters
+        ----------
+        napari_viewer : napari.Viewer or None, default=None
+            Napari viewer.
+        """
         super().__init__(TrainPlugin(napari_viewer))
 
 
 class TrainPlugin(QWidget):
+    """CAREamics training plugin.
+
+    Parameters
+    ----------
+    napari_viewer : napari.Viewer or None, default=None
+        Napari viewer.
+    """
+
     def __init__(
         self: Self,
         napari_viewer: Optional[napari.Viewer] = None,
     ) -> None:
+        """Initialize the plugin.
+
+        Parameters
+        ----------
+        napari_viewer : napari.Viewer or None, default=None
+            Napari viewer.
+        """
         super().__init__()
         self.viewer = napari_viewer
         self.careamist = None
@@ -99,9 +129,9 @@ class TrainPlugin(QWidget):
         # set workdir
         self.train_config_signal.work_dir = Path.cwd()
 
-        self.init_ui()
+        self._init_ui()
 
-    def init_ui(self) -> None:
+    def _init_ui(self) -> None:
         """Assemble the widgets."""
         # layout
         self.setLayout(QVBoxLayout())
@@ -187,10 +217,25 @@ class TrainPlugin(QWidget):
         self.save_status.events.state.connect(self._saving_state_changed)
 
     def _set_pred_3d(self, is_3d: bool) -> None:
-        """Set the prediction widget to 3D mode."""
+        """Set the 3D mode flag in the prediction signal.
+
+        Parameters
+        ----------
+        is_3d : bool
+            3D mode.
+        """
         self.pred_config_signal.is_3d = is_3d
 
     def _training_state_changed(self, state: TrainingState) -> None:
+        """Handle training state changes.
+
+        This includes starting and stopping training.
+
+        Parameters
+        ----------
+        state : TrainingState
+            New state.
+        """
         if state == TrainingState.TRAINING:
             self.train_worker = train_worker(
                 self.train_config_signal,
@@ -210,6 +255,13 @@ class TrainPlugin(QWidget):
             self.careamist = None
 
     def _prediction_state_changed(self, state: PredictionState) -> None:
+        """Handle prediction state changes.
+
+        Parameters
+        ----------
+        state : PredictionState
+            New state.
+        """
         if state == PredictionState.PREDICTING:
             self.pred_worker = predict_worker(
                 self.careamist, self.pred_config_signal, self._prediction_queue
@@ -219,9 +271,18 @@ class TrainPlugin(QWidget):
             self.pred_worker.start()
 
         elif state == PredictionState.STOPPED:
-            self.careamist.stop_prediction()
+            # self.careamist.stop_prediction()
+            # TODO not existing yet
+            pass
 
     def _saving_state_changed(self, state: SavingState) -> None:
+        """Handle saving state changes.
+
+        Parameters
+        ----------
+        state : SavingState
+            New state.
+        """
         if state == SavingState.SAVING:
             self.save_worker = save_worker(
                 self.careamist, self.train_config_signal, self.save_config_signal
@@ -231,7 +292,15 @@ class TrainPlugin(QWidget):
             self.save_worker.start()
 
     def _update_from_training(self, update: TrainUpdate) -> None:
-        """Update the signal from the training worker."""
+        """Update the training status from the training worker.
+
+        This method receives the updates from the training worker.
+
+        Parameters
+        ----------
+        update : TrainUpdate
+            Update.
+        """
         if update.type == TrainUpdateType.CAREAMIST:
             self.careamist = update.value
         elif update.type == TrainUpdateType.DEBUG:
@@ -243,7 +312,15 @@ class TrainPlugin(QWidget):
             self.train_status.update(update)
 
     def _update_from_prediction(self, update: PredictionUpdate) -> None:
-        """Update the signal from the prediction worker."""
+        """Update the signal from the prediction worker.
+
+        This method receives the updates from the prediction worker.
+
+        Parameters
+        ----------
+        update : PredictionUpdate
+            Update.
+        """
         if update.type == PredictionUpdateType.DEBUG:
             print(update.value)
         elif update.type == PredictionUpdateType.EXCEPTION:
@@ -268,7 +345,15 @@ class TrainPlugin(QWidget):
                 self.pred_status.update(update)
 
     def _update_from_saving(self, update: SavingUpdate) -> None:
-        """Update the signal from the saving worker."""
+        """Update the signal from the saving worker.
+
+        This method receives the updates from the saving worker.
+
+        Parameters
+        ----------
+        update : SavingUpdate
+            Update.
+        """
         if update.type == SavingUpdateType.DEBUG:
             print(update.value)
         elif update.type == SavingUpdateType.EXCEPTION:
@@ -281,7 +366,13 @@ class TrainPlugin(QWidget):
                 ntf.show_error("An error occurred during saving.")
 
     def _set_data_from_algorithm(self, name: str) -> None:
-        """Set the data selection widget based on the algorithm."""
+        """Update the data selection widget based on the algorithm.
+
+        Parameters
+        ----------
+        name : str
+            Algorithm name.
+        """
         if (
             name == SupportedAlgorithm.CARE.value
             or name == SupportedAlgorithm.N2N.value
@@ -291,6 +382,13 @@ class TrainPlugin(QWidget):
             self.data_stck.setCurrentIndex(0)
 
     def closeEvent(self, event) -> None:
+        """Close the plugin.
+
+        Parameters
+        ----------
+        event : QCloseEvent
+            Close event.
+        """
         super().closeEvent(event)
         # TODO check training or prediction and stop it
 

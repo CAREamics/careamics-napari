@@ -31,7 +31,15 @@ from .qt_widgets import create_int_spinbox
 # TODO add minimum percentage and minimum val data
 # TODO add default values from the configuration_signal
 class AdvancedConfigurationWindow(QDialog):
-    """A dialog widget allowing modifying advanced settings."""
+    """A dialog widget allowing modifying advanced settings.
+
+    Parameters
+    ----------
+    parent : QWidget
+        Parent widget.
+    training_signal : TrainingSignal or None, default=None
+        Signal used to update the parameters set by the user.
+    """
 
     def __init__(
         self, parent: QWidget, training_signal: Optional[TrainingSignal] = None
