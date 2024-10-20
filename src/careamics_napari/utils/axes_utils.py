@@ -32,7 +32,7 @@ def filter_dimensions(shape_length: int, is_3D: bool) -> list[str]:
         axes.remove("Z")
 
     if n > len(axes):
-        warnings.warn("Data shape length is too large.")
+        warnings.warn("Data shape length is too large.", stacklevel=3)
         return []
     else:
         all_permutations = ["".join(p) for p in permutations(axes, n)]
@@ -70,7 +70,7 @@ def are_axes_valid(axes: str) -> bool:
         return False
 
     # all characters must be in REF_AXES = 'STZYXC'
-    if not all([s in REF_AXES for s in _axes]):
+    if not all(s in REF_AXES for s in _axes):
         return False
 
     # check for repeating characters

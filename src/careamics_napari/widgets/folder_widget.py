@@ -5,7 +5,13 @@ from typing_extensions import Self
 
 
 class FolderWidget(QWidget):
-    """A widget used for selecting an existing folder."""
+    """A widget used for selecting an existing folder.
+
+    Parameters
+    ----------
+    text : str
+        Text displayed on the button.
+    """
 
     def __init__(self: Self, text: str) -> None:
         """Initialize the widget.

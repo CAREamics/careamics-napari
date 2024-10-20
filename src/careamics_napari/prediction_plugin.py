@@ -1,1 +1,3 @@
+"""CAREamics prediction plugin."""
+
 # TODO

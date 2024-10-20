@@ -58,21 +58,36 @@ def _open_link(link: str) -> Callable:
         Link opener.
     """
 
-    def link_opener(_: Any):
+    def link_opener(_: Any) -> None:
+        """Open link in browser.
+
+        Parameters
+        ----------
+        _ : Any
+            Unused parameter.
+        """
         webbrowser.open(link)
 
     return link_opener
 
 
 class CAREamicsBanner(QWidget):
-    """Banner widget with CAREamics logo, and links to Github and documentation."""
+    """Banner widget with CAREamics logo, and links to Github and documentation.
+
+    Parameters
+    ----------
+    title : str
+        Title of the banner.
+    short_desc : str
+        Short description of the banner.
+    """
 
     def __init__(
         self: Self,
         title: str,
         short_desc: str,
     ) -> None:
-        """Constructor.
+        """Initialize the widget.
 
         Parameters
         ----------

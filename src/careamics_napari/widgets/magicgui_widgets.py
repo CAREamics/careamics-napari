@@ -21,9 +21,7 @@ def layer_choice(annotation: Optional[Any] = Image, **kwargs: Any) -> Widget:
 
     Parameters
     ----------
-    name : str
-        The name of the widget.
-    annotation : Any or None
+    annotation : Any or None, default=Image
         The annotation type to filter the layers.
     **kwargs : Any
         Additional keyword arguments to pass to the widget.
@@ -31,7 +29,7 @@ def layer_choice(annotation: Optional[Any] = Image, **kwargs: Any) -> Widget:
     Returns
     -------
     Widget
-        The widget to select a layer from the napari viewer
+        The widget to select a layer from the napari viewer.
 
     Raises
     ------

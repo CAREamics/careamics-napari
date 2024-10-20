@@ -29,7 +29,15 @@ else:
 
 # TODO if user don't change the layers then they are None in the signal
 class TrainDataWidget(QTabWidget):
-    """A widget offering to select layers from napari or paths from disk."""
+    """A widget offering to select layers from napari or paths from disk.
+
+    Parameters
+    ----------
+    signal : TrainConfigurationSignal or None, default=None
+        Signal representing the training parameters.
+    use_target : bool, default=False
+        Whether to target fields.
+    """
 
     def __init__(
         self: Self,

@@ -40,10 +40,24 @@ class DoubleSpinBox(QDoubleSpinBox):
 
 
 class PowerOfTwoSpinBox(QSpinBox):
-    """A spin box that only accepts power of two values."""
+    """A spin box that only accepts power of two values.
+
+    Parameters
+    ----------
+    min_val : int
+        Minimum value.
+    max_val : int
+        Maximum value.
+    default : int
+        Default value.
+    *args : Any
+        Additional arguments.
+    **kwargs : Any
+        Additional keyword arguments.
+    """
 
     def __init__(
-        self: Self, min_val: int, max_val: int, default: int, *args, **kwargs
+        self: Self, min_val: int, max_val: int, default: int, *args: Any, **kwargs: Any
     ) -> None:
         """Initialize the widget.
 
@@ -55,6 +69,10 @@ class PowerOfTwoSpinBox(QSpinBox):
             Maximum value.
         default : int
             Default value.
+        *args : Any
+            Additional arguments.
+        **kwargs : Any
+            Additional keyword arguments.
 
         Raises
         ------
@@ -206,6 +224,11 @@ def create_int_spinbox(
         Visibility.
     tooltip : str or None, default=None
         Tooltip text.
+
+    Returns
+    -------
+    SpinBox
+        The integer spin box.
     """
     spin_box = SpinBox()
     spin_box.setMinimum(min_value)

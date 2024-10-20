@@ -24,7 +24,7 @@
 
 # @pytest.mark.qt
 # def test_axes_widget_change_dims(qtbot):
-#     widget = AxesWidget(6, False)  # default text is now invalid, regardless of is_3D or n_axes
+#     widget = AxesWidget(6, False)  # default text is now invalid
 #     assert not widget.is_valid()  # cannot be valid with n=6 and no 3D
 
 #     # change is_3D

@@ -13,7 +13,15 @@ from careamics_napari.widgets import TBPlotWidget, create_progressbar
 
 
 class TrainProgressWidget(QGroupBox):
-    """A widget displaying the training progress using two progress bars."""
+    """A widget displaying the training progress using two progress bars.
+
+    Parameters
+    ----------
+    train_status : TrainingStatus or None, default=None
+        Signal representing the training status.
+    train_config : TrainingSignal or None, default=None
+        Signal representing the training parameters.
+    """
 
     def __init__(
         self: Self,
@@ -100,10 +108,8 @@ class TrainProgressWidget(QGroupBox):
 
         Parameters
         ----------
-        self : Self
-            _description_
         epoch : int
-            _description_
+            Current epoch.
         """
         self.pb_epochs.setValue(epoch + 1)
         self.pb_epochs.setFormat(f"Epoch {epoch+1}/{self.train_status.max_epochs}")

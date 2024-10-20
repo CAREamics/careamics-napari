@@ -1,3 +1,5 @@
+"""Training widget."""
+
 from typing import Optional
 
 from qtpy.QtWidgets import (
@@ -13,11 +15,27 @@ from careamics_napari.signals import TrainingState, TrainingStatus
 
 
 class TrainingWidget(QGroupBox):
+    """Training widget.
 
-    def __init__(self: Self, signal: Optional[TrainingStatus] = None) -> None:
+    Parameters
+    ----------
+    train_status : TrainingStatus or None, default=None
+        Training status.
+    """
+
+    def __init__(self: Self, train_status: Optional[TrainingStatus] = None) -> None:
+        """Initialize the widget.
+
+        Parameters
+        ----------
+        train_status : TrainingStatus or None, default=None
+            Training status.
+        """
         super().__init__()  # TODO needed? and in the other classes? to pass parent?
 
-        self.train_status = signal
+        self.train_status = (
+            TrainingStatus() if train_status is None else train_status  # type: ignore
+        )
 
         self.setTitle("Train")
         self.setLayout(QVBoxLayout())
@@ -47,7 +65,8 @@ class TrainingWidget(QGroupBox):
             # listening to the signal
             self.train_status.events.state.connect(self._update_button)
 
-    def _train_stop_clicked(self):
+    def _train_stop_clicked(self) -> None:
+        """Update the UI and training status when the train button is clicked."""
         if self.train_status is not None:
             if (
                 self.train_status.state == TrainingState.IDLE
@@ -68,7 +87,8 @@ class TrainingWidget(QGroupBox):
                 self.train_status.state = TrainingState.TRAINING
                 self.train_button.setText("Stop")
 
-    def _reset_clicked(self):
+    def _reset_clicked(self) -> None:
+        """Update the UI and training status when the reset button is clicked."""
         if self.train_status is not None:
             if self.train_status.state != TrainingState.TRAINING:
                 self.train_status.state = TrainingState.IDLE
@@ -76,7 +96,14 @@ class TrainingWidget(QGroupBox):
                 self.reset_model_button.setEnabled(False)
                 self.reset_model_button.setText("")
 
-    def _update_button(self, new_state: TrainingState):
+    def _update_button(self, new_state: TrainingState) -> None:
+        """Update the button text based on the training state.
+
+        Parameters
+        ----------
+        new_state : TrainingState
+            New training state.
+        """
         if new_state == TrainingState.DONE or new_state == TrainingState.STOPPED:
             self.train_button.setText("Train")
             self.reset_model_button.setEnabled(True)

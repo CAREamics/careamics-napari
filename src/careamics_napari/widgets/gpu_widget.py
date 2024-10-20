@@ -14,10 +14,10 @@ def create_gpu_label() -> QLabel:
     """
     if is_available():
         text = "GPU"
-        color = "ADC2A9" # green
+        color = "ADC2A9"  # green
     else:
         text = "CPU"
-        color = "FFDBA4" # yellow
+        color = "FFDBA4"  # yellow
 
     gpu_label = QLabel(text)
     font_color = gpu_label.palette().color(gpu_label.foregroundRole()).name()[1:]
@@ -41,8 +41,9 @@ def create_gpu_label() -> QLabel:
 
 
 if __name__ == "__main__":
-    from qtpy.QtWidgets import QApplication
     import sys
+
+    from qtpy.QtWidgets import QApplication
 
     # Create a QApplication instance
     app = QApplication(sys.argv)
