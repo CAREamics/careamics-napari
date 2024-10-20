@@ -25,7 +25,17 @@ from careamics_napari.signals import (
 
 
 class SavingWidget(QGroupBox):
-    """A widget allowing users to select a model type and a path."""
+    """A widget allowing users to select a model type and a path.
+
+    Parameters
+    ----------
+    train_status : TrainingStatus or None, default=None
+        Signal containing training parameters.
+    save_status : SavingStatus or None, default=None
+        Signal containing saving parameters.
+    save_signal : SavingSignal or None, default=None
+        Signal to trigger saving.
+    """
 
     def __init__(
         self: Self,
@@ -106,7 +116,7 @@ class SavingWidget(QGroupBox):
     def _save_model(self: Self) -> None:
         """Prompt users with a path selection dialog and update the saving state."""
         if self.save_status is not None:
-            if (
+            if self.save_signal is not None and (
                 self.save_status.state == SavingState.IDLE
                 or self.save_status.state == SavingState.DONE
                 or self.save_status.state == SavingState.CRASHED

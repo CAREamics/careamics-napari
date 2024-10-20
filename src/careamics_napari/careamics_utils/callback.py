@@ -1,5 +1,4 @@
-"""PyTorch Lightning callback for updating a GUI with training and prediction progress.
-"""
+"""PyTorch Lightning callback used to update GUI with progress."""
 
 from queue import Queue
 from typing import Any
@@ -78,10 +77,12 @@ class UpdaterCallBack(Callback):
             PyTorch Lightning module.
         """
         # compute the number of batches
+        len_dataloader = len(trainer.train_dataloader)  # type: ignore
+
         self.training_queue.put(
             TrainUpdate(
                 TrainUpdateType.MAX_BATCH,
-                int(len(trainer.train_dataloader) / trainer.accumulate_grad_batches),
+                int(len_dataloader / trainer.accumulate_grad_batches),
             )
         )
 

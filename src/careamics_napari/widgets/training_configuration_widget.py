@@ -24,20 +24,26 @@ from careamics_napari.widgets import (
 
 
 class ConfigurationWidget(QGroupBox):
-    """A widget allowing the creation of a CAREamics configuration."""
+    """A widget allowing the creation of a CAREamics configuration.
+
+    Parameters
+    ----------
+    training_signal : TrainingSignal or None, default=None
+        Signal containing the training parameters.
+    """
 
     def __init__(self: Self, training_signal: Optional[TrainingSignal] = None) -> None:
         """Initialize the widget.
 
         Parameters
         ----------
-        signal : TrainingSignal or None, default=None
+        training_signal : TrainingSignal or None, default=None
             Signal containing the training parameters.
         """
         super().__init__()
 
         self.configuration_signal = training_signal
-        self.config_window = None
+        self.config_window: Optional[AdvancedConfigurationWindow] = None
 
         self.setTitle("Training parameters")
         # self.setMinimumWidth(100)

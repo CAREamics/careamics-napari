@@ -1,5 +1,7 @@
 """Utility to create CAREamics configurations from user-set settings."""
 
+from typing import Union
+
 from careamics import Configuration
 from careamics.config import (
     create_care_configuration,
@@ -37,13 +39,13 @@ def create_configuration(signal: TrainingSignal) -> Configuration:
         experiment_name = signal.experiment_name
 
     if signal.is_3d:
-        patches: tuple[int, ...] = (
+        patches: list[int] = [
             signal.patch_size_xy,
             signal.patch_size_xy,
             signal.patch_size_z,
-        )
+        ]
     else:
-        patches = (signal.patch_size_xy, signal.patch_size_xy)
+        patches = [signal.patch_size_xy, signal.patch_size_xy]
 
     # model params
     model_params = {
@@ -52,7 +54,7 @@ def create_configuration(signal: TrainingSignal) -> Configuration:
     }
 
     # augmentations
-    augs = []
+    augs: list[Union[XYFlipModel, XYRandomRotate90Model]] = []
     if signal.x_flip or signal.y_flip:
         augs.append(XYFlipModel(flip_x=signal.x_flip, flip_y=signal.y_flip))
 

@@ -14,7 +14,11 @@ def free_memory(careamist: CAREamist) -> None:
     careamist : CAREamist
         CAREamics instance.
     """
-    if careamist is not None:
+    if (
+        careamist is not None
+        and careamist.trainer is not None
+        and careamist.trainer.model is not None
+    ):
         careamist.trainer.model.cpu()
         del careamist.trainer.model
         del careamist.trainer

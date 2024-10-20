@@ -37,6 +37,7 @@ repos:
         additional_dependencies:
           - numpy
           - types-PyYAML
+          - careamics-stubs
 
   # check docstrings
   - repo: https://github.com/numpy/numpydoc

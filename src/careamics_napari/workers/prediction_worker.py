@@ -144,8 +144,8 @@ def _predict(
 
     # Predict with CAREamist
     try:
-        result = careamist.predict(
-            source=pred_data,
+        result = careamist.predict(  # type: ignore
+            pred_data,
             data_type="tiff" if config_signal.load_from_disk else "array",
             tile_size=tile_size,
             tile_overlap=tile_overlap,

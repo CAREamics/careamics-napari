@@ -9,7 +9,13 @@ from careamics_napari.signals import TrainingSignal
 
 
 class AlgorithmSelectionWidget(QComboBox):
-    """Algorithm selection widget."""
+    """Algorithm selection widget.
+
+    Parameters
+    ----------
+    training_signal : TrainingSignal or None, default=None
+        Training signal holding all parameters to be set by the user.
+    """
 
     def __init__(self, training_signal: Optional[TrainingSignal] = None) -> None:
         """Initialize the widget.
@@ -61,7 +67,7 @@ if __name__ == "__main__":
 
     from qtpy.QtWidgets import QApplication
 
-    myalgo = TrainingSignal()  # typing: ignore
+    myalgo = TrainingSignal()  # type: ignore
 
     @myalgo.events.name.connect
     def print_algorithm(name: str):

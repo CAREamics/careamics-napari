@@ -39,9 +39,9 @@ class PredictionWidget(QGroupBox):
         The training status signal.
     pred_status : PredictionStatus or None, default=None
         The prediction status signal.
-    train_config_signal : TrainingSignal or None, default=None
+    train_signal : TrainingSignal or None, default=None
         The training configuration signal.
-    pred_config_signal : PredictionSignal or None, default=None
+    pred_signal : PredictionSignal or None, default=None
         The prediction configuration signal.
     """
 
@@ -49,8 +49,8 @@ class PredictionWidget(QGroupBox):
         self: Self,
         train_status: Optional[TrainingStatus] = None,
         pred_status: Optional[PredictionStatus] = None,
-        train_config_signal: Optional[TrainingSignal] = None,
-        pred_config_signal: Optional[PredictionSignal] = None,
+        train_signal: Optional[TrainingSignal] = None,
+        pred_signal: Optional[PredictionSignal] = None,
     ) -> None:
         """Initialize the widget.
 
@@ -60,24 +60,30 @@ class PredictionWidget(QGroupBox):
             The training status signal.
         pred_status : PredictionStatus or None, default=None
             The prediction status signal.
-        train_config_signal : TrainingSignal or None, default=None
+        train_signal : TrainingSignal or None, default=None
             The training configuration signal.
-        pred_config_signal : PredictionSignal or None, default=None
+        pred_signal : PredictionSignal or None, default=None
             The prediction configuration signal.
         """
         super().__init__()
 
-        self.train_status = train_status
-        self.pred_status = pred_status
-        self.train_config_signal = train_config_signal
-        self.pred_config_signal = pred_config_signal
+        self.train_status = (
+            TrainingStatus() if train_status is None else train_status  # type: ignore
+        )
+        self.pred_status = (
+            PredictionStatus() if pred_status is None else pred_status  # type: ignore
+        )
+        self.train_signal = (
+            TrainingSignal() if train_signal is None else train_signal  # type: ignore
+        )
+        self.pred_signal = PredictionSignal() if pred_signal is None else pred_signal
 
         self.setTitle("Prediction")
         self.setLayout(QVBoxLayout())
         self.layout().setContentsMargins(20, 20, 20, 0)
 
         # data selection
-        predict_data_widget = PredictDataWidget(self.pred_config_signal)
+        predict_data_widget = PredictDataWidget(self.pred_signal)
         self.layout().addWidget(predict_data_widget)
 
         # checkbox
@@ -89,13 +95,11 @@ class PredictionWidget(QGroupBox):
         self.layout().addWidget(self.tiling_cbox)
 
         # tiling spinboxes
-        self.tile_size_xy = PowerOfTwoSpinBox(
-            64, 1024, self.pred_config_signal.tile_size_xy
-        )
+        self.tile_size_xy = PowerOfTwoSpinBox(64, 1024, self.pred_signal.tile_size_xy)
         self.tile_size_xy.setToolTip("Tile size in the xy dimension.")
         self.tile_size_xy.setEnabled(False)
 
-        self.tile_size_z = PowerOfTwoSpinBox(4, 32, self.pred_config_signal.tile_size_z)
+        self.tile_size_z = PowerOfTwoSpinBox(4, 32, self.pred_signal.tile_size_z)
         self.tile_size_z.setToolTip("Tile size in the z dimension.")
         self.tile_size_z.setEnabled(False)
 
@@ -137,7 +141,7 @@ class PredictionWidget(QGroupBox):
             self.tile_size_z.valueChanged.connect(self._set_z_tile_size)
 
             # listening to the signals
-            self.train_config_signal.events.is_3d.connect(self._set_3d)
+            self.train_signal.events.is_3d.connect(self._set_3d)
             self.train_status.events.state.connect(self._update_button_from_train)
             self.pred_status.events.state.connect(self._update_button_from_pred)
 
@@ -152,8 +156,8 @@ class PredictionWidget(QGroupBox):
         size : int
             The new tile size in the xy dimension.
         """
-        if self.pred_config_signal is not None:
-            self.pred_config_signal.tile_size_xy = size
+        if self.pred_signal is not None:
+            self.pred_signal.tile_size_xy = size
 
     def _set_z_tile_size(self: Self, size: int) -> None:
         """Update the signal tile size in the z dimension.
@@ -163,8 +167,8 @@ class PredictionWidget(QGroupBox):
         size : int
             The new tile size in the z dimension.
         """
-        if self.pred_config_signal is not None:
-            self.pred_config_signal.tile_size_z = size
+        if self.pred_signal is not None:
+            self.pred_signal.tile_size_z = size
 
     def _set_3d(self: Self, state: bool) -> None:
         """Enable the z tile size spinbox if the data is 3D.
@@ -174,7 +178,7 @@ class PredictionWidget(QGroupBox):
         state : bool
             The new state of the 3D checkbox.
         """
-        if self.pred_config_signal.tiled:
+        if self.pred_signal.tiled:
             self.tile_size_z.setEnabled(state)
 
     def _update_tiles(self: Self, state: bool) -> None:
@@ -185,10 +189,10 @@ class PredictionWidget(QGroupBox):
         state : bool
             The new state of the tiling checkbox.
         """
-        self.pred_config_signal.tiled = state
+        self.pred_signal.tiled = state
         self.tile_size_xy.setEnabled(state)
 
-        if self.train_config_signal.is_3d:
+        if self.train_signal.is_3d:
             self.tile_size_z.setEnabled(state)
 
     def _update_3d_tiles(self: Self, state: bool) -> None:
@@ -199,7 +203,7 @@ class PredictionWidget(QGroupBox):
         state : bool
             The new state of the 3D checkbox.
         """
-        if self.pred_config_signal.tiled:
+        if self.pred_signal.tiled:
             self.tile_size_z.setEnabled(state)
 
     def _update_max_sample(self: Self, max_sample: int) -> None:
@@ -270,12 +274,13 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     # create signal
-    train_signal = TrainingStatus()
-    pred_signal = PredictionStatus()
-    config_signal = PredictionSignal()
+    train_status = TrainingStatus()  # type: ignore
+    pred_status = PredictionStatus()  # type: ignore
+    pred_signal = PredictionSignal()  # type: ignore
+    train_signal = TrainingSignal()  # type: ignore
 
     # Instantiate widget
-    widget = PredictionWidget(train_signal, pred_signal, config_signal)
+    widget = PredictionWidget(train_status, pred_status, train_signal, pred_signal)
 
     # Show the widget
     widget.show()

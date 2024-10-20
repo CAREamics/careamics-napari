@@ -25,7 +25,17 @@ class Highlight(Enum):
 
 
 class LettersValidator(QtGui.QValidator):
-    """Custom validator."""
+    """Custom validator.
+
+    Parameters
+    ----------
+    options : str
+        Allowed characters.
+    *args : Any
+        Variable length argument list.
+    **kwargs : Any
+        Arbitrary keyword arguments.
+    """
 
     def __init__(self: Self, options: str, *args: Any, **kwargs: Any) -> None:
         """Initialize the validator.
@@ -53,6 +63,11 @@ class LettersValidator(QtGui.QValidator):
             Input value.
         pos : int
             Position of the cursor.
+
+        Returns
+        -------
+        (QtGui.QValidator.State, str, int)
+            Validation state, value, and position.
         """
         if len(value) > 0:
             if value[-1] in self._options:
@@ -66,8 +81,19 @@ class LettersValidator(QtGui.QValidator):
 # TODO keep the validation?
 # TODO is train layer selected, then show the orange and red, otherwise ignore?
 class AxesWidget(QWidget):
-    """A widget allowing users to specify axes."""
+    """A widget allowing users to specify axes.
 
+    Parameters
+    ----------
+    n_axes : int, default=3
+        Number of axes.
+    is_3D : bool, default=False
+        Whether the data is 3D.
+    training_signal : TrainingSignal or None, default=None
+        Signal holding all training parameters to be set by the user.
+    """
+
+    # TODO unused parameters
     def __init__(
         self, n_axes=3, is_3D=False, training_signal: Optional[TrainingSignal] = None
     ) -> None:
@@ -79,7 +105,7 @@ class AxesWidget(QWidget):
             Number of axes.
         is_3D : bool, default=False
             Whether the data is 3D.
-        signal : TrainingSignal or None, default=None
+        training_signal : TrainingSignal or None, default=None
             Signal holding all training parameters to be set by the user.
         """
         super().__init__()
@@ -227,10 +253,11 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     # Signals
-    myalgo = TrainingSignal()
+    myalgo = TrainingSignal()  # type: ignore
 
     @myalgo.events.use_channels.connect
     def print_axes():
+        """Print axes."""
         print(f"Use channels: {myalgo.use_channels}")
 
     # Instantiate widget

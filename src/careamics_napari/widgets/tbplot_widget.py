@@ -16,7 +16,21 @@ from careamics_napari.signals import TrainingSignal
 
 # TODO why is it a magicgui container and not just a widget?
 class TBPlotWidget(Container):
-    """A widget displaying losses and a button to open TensorBoard in the browser."""
+    """A widget displaying losses and a button to open TensorBoard in the browser.
+
+    Parameters
+    ----------
+    min_width : int or None, default=None
+        Minimum width of the widget.
+    min_height : int or None, default=None
+        Minimum height of the widget.
+    max_width : int or None, default=None
+        Maximum width of the widget.
+    max_height : int or None, default=None
+        Maximum height of the widget.
+    train_signal : TrainingSignal or None, default=None
+        Signal containing training parameters.
+    """
 
     # TODO what is this method used for?
     def __setitem__(self: Self, key: Any, value: Any) -> None:
@@ -94,10 +108,10 @@ class TBPlotWidget(Container):
         self.native.layout().addWidget(button_widget)
 
         # set empty references
-        self.epochs = []
-        self.train_loss = []
-        self.val_loss = []
-        self.url = None
+        self.epochs: list[int] = []
+        self.train_loss: list[float] = []
+        self.val_loss: list[float] = []
+        self.url: Optional[str] = None
         self.tb = None
 
     def stop_tb(self: Self) -> None:
@@ -111,18 +125,20 @@ class TBPlotWidget(Container):
 
     def open_tb(self: Self) -> None:
         """Open TensorBoard in the browser."""
-        if not self.tb:
+        if self.tb is not None and self.train_signal is not None:
             from tensorboard import program
 
             self.tb = program.TensorBoard()
 
             path = str(self.train_signal.work_dir / "logs" / "lightning_logs")
-            self.tb.configure(argv=[None, "--logdir", path])
-            self.url = self.tb.launch()
+            self.tb.configure(argv=[None, "--logdir", path])  # type: ignore
+            self.url = self.tb.launch()  # type: ignore
 
-            webbrowser.open(self.url)
+            if self.url is not None:
+                webbrowser.open(self.url)
         else:
-            webbrowser.open(self.url)
+            if self.url is not None:
+                webbrowser.open(self.url)
 
     def update_plot(self: Self, epoch: int, train_loss: float, val_loss: float) -> None:
         """Update the plot with new data.

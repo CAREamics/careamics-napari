@@ -42,6 +42,7 @@ from careamics_napari.workers import predict_worker, save_worker, train_worker
 
 if TYPE_CHECKING:
     import napari
+    from careamics import CAREamist
 
 # at run time
 try:
@@ -108,23 +109,23 @@ class TrainPlugin(QWidget):
         """
         super().__init__()
         self.viewer = napari_viewer
-        self.careamist = None
+        self.careamist: Optional[CAREamist] = None
 
         # create statuses, used to keep track of the threads statuses
-        self.train_status = TrainingStatus()
-        self.pred_status = PredictionStatus()
-        self.save_status = SavingStatus()
+        self.train_status = TrainingStatus()  # type: ignore
+        self.pred_status = PredictionStatus()  # type: ignore
+        self.save_status = SavingStatus()  # type: ignore
 
         # create signals, used to hold the various parameters modified by the UI
-        self.train_config_signal = TrainingSignal()
+        self.train_config_signal = TrainingSignal()  # type: ignore
         self.pred_config_signal = PredictionSignal()
         self.save_config_signal = SavingSignal()
 
         self.train_config_signal.events.is_3d.connect(self._set_pred_3d)
 
         # create queues, used to communicate between the threads and the UI
-        self._training_queue = Queue(10)
-        self._prediction_queue = Queue(10)
+        self._training_queue: Queue = Queue(10)
+        self._prediction_queue: Queue = Queue(10)
 
         # set workdir
         self.train_config_signal.work_dir = Path.cwd()
@@ -248,7 +249,8 @@ class TrainPlugin(QWidget):
             self.train_worker.start()
 
         elif state == TrainingState.STOPPED:
-            self.careamist.stop_training()
+            if self.careamist is not None:
+                self.careamist.stop_training()
 
         elif state == TrainingState.CRASHED or state == TrainingState.IDLE:
             del self.careamist
@@ -302,12 +304,15 @@ class TrainPlugin(QWidget):
             Update.
         """
         if update.type == TrainUpdateType.CAREAMIST:
-            self.careamist = update.value
+            if isinstance(update.value, CAREamist):
+                self.careamist = update.value
         elif update.type == TrainUpdateType.DEBUG:
             print(update.value)
         elif update.type == TrainUpdateType.EXCEPTION:
             self.train_status.state = TrainingState.CRASHED
-            raise update.value
+
+            if isinstance(update.value, Exception):
+                raise update.value
         else:
             self.train_status.update(update)
 
@@ -340,7 +345,8 @@ class TrainPlugin(QWidget):
             if update.type == PredictionUpdateType.SAMPLE:
                 # add image to napari
                 # TODO keep scaling?
-                self.viewer.add_image(update.value, name="Prediction")
+                if self.viewer is not None:
+                    self.viewer.add_image(update.value, name="Prediction")
             else:
                 self.pred_status.update(update)
 

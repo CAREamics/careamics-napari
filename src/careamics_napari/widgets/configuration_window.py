@@ -55,7 +55,11 @@ class AdvancedConfigurationWindow(QDialog):
         """
         super().__init__(parent)
 
-        self.configuration_signal = training_signal
+        self.configuration_signal = (
+            TrainingSignal()  # type: ignore
+            if training_signal is None
+            else training_signal
+        )
 
         self.setLayout(QVBoxLayout())
 
@@ -181,7 +185,7 @@ class AdvancedConfigurationWindow(QDialog):
         self.model_depth = create_int_spinbox(2, 5, self.configuration_signal.depth, 1)
         self.model_depth.setToolTip("Depth of the U-Net model.")
         self.size_conv_filters = create_int_spinbox(
-            8, 1024, self.configuration_signal.num_conv_filters, 8, 8
+            8, 1024, self.configuration_signal.num_conv_filters, 8
         )
         self.size_conv_filters.setToolTip(
             "Number of convolutional filters in the first layer."
@@ -274,10 +278,10 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     # Signals
-    myalgo = TrainingSignal(use_channels=False)
+    myalgo = TrainingSignal(use_channels=False)  # type: ignore
 
     # Instantiate widget
-    widget = AdvancedConfigurationWindow(training_signal=myalgo)
+    widget = AdvancedConfigurationWindow(training_signal=myalgo)  # type: ignore
 
     # Show the widget
     widget.show()

@@ -28,7 +28,13 @@ else:
 
 
 class PredictDataWidget(QTabWidget):
-    """A widget offering to select a layer from napari or a path from disk."""
+    """A widget offering to select a layer from napari or a path from disk.
+
+    Parameters
+    ----------
+    prediction_signal : PredConfigurationSignal, default=None
+        Signal to be updated with changed in widgets values.
+    """
 
     def __init__(
         self: Self,
@@ -38,11 +44,16 @@ class PredictDataWidget(QTabWidget):
 
         Parameters
         ----------
-        signal : PredConfigurationSignal, default=None
+        prediction_signal : PredConfigurationSignal, default=None
             Signal to be updated with changed in widgets values.
         """
         super().__init__()
-        self.config_signal = prediction_signal
+
+        self.config_signal = (
+            PredictionSignal()  # type: ignore
+            if prediction_signal is None
+            else prediction_signal
+        )
 
         # QTabs
         layer_tab = QWidget()
@@ -138,7 +149,8 @@ class PredictDataWidget(QTabWidget):
         layer : Image
             The selected layer.
         """
-        self.config_signal.layer_pred = layer
+        if self.config_signal.layer_pred is not None:
+            self.config_signal.layer_pred = layer
 
     def _update_pred_folder(self: Self, folder: str) -> None:
         """Update the path attribute of the signal.
@@ -148,7 +160,8 @@ class PredictDataWidget(QTabWidget):
         folder : str
             The selected folder.
         """
-        self.config_signal.path_pred = folder
+        if self.config_signal.path_pred is not None:
+            self.config_signal.path_pred = folder
 
 
 if __name__ == "__main__":

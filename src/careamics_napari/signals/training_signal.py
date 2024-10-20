@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 from careamics.utils import get_careamics_home
 from psygnal import evented
@@ -35,6 +35,8 @@ except ImportError:
 else:
     _has_napari = True
 
+HOME = get_careamics_home()
+
 
 # TODO make sure defaults are used
 @evented
@@ -62,7 +64,7 @@ class TrainingSignal:
     """Whether the data is 3D."""
 
     # parameters set by widgets for training
-    work_dir: Union[str, Path] = get_careamics_home()
+    work_dir: Path = HOME
     """Directory where the checkpoints and logs are saved."""
 
     load_from_disk: bool = True
