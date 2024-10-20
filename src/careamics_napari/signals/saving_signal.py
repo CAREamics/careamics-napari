@@ -5,7 +5,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Union
 
 
 class ExportType(Enum):
@@ -38,7 +37,7 @@ class SavingSignal:
     elements.
     """
 
-    path_model: Union[str, Path] = ""
+    path_model: Path = Path(".")
     """Path in which to save the model."""
 
     export_type: ExportType = ExportType.BMZ
