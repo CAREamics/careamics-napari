@@ -22,7 +22,7 @@ dependencies = [
     'psygnal',
     'pyqtgraph',
     'napari',
-    'careamics[tensorboard]',
+    'careamics[tensorboard]>=0.0.4',
     'careamics-portfolio',
 ]
 
