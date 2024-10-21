@@ -1,12 +1,7 @@
 """Wrap a widget in a scroll area."""
 
-from typing import TYPE_CHECKING
-
 from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QScrollArea
-
-if TYPE_CHECKING:
-    from qtpy.QtWidgets import QWidget
+from qtpy.QtWidgets import QScrollArea, QWidget
 
 
 class ScrollWidgetWrapper(QScrollArea):
