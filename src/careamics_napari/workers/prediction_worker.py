@@ -1,5 +1,6 @@
 """A thread worker function running CAREamics prediction."""
 
+import traceback
 from collections.abc import Generator
 from queue import Queue
 from threading import Thread
@@ -75,6 +76,11 @@ def _push_exception(queue: Queue, e: Exception) -> None:
     e : Exception
         Exception.
     """
+    try:
+        raise e
+    except Exception as _:
+        traceback.print_exc()
+
     queue.put(PredictionUpdate(PredictionUpdateType.EXCEPTION, e))
 
 
@@ -108,6 +114,7 @@ def _predict(
             _push_exception(
                 update_queue, ValueError("Prediction layer has not been selected.")
             )
+            return
 
         elif config_signal.layer_pred.data is None:
             _push_exception(
@@ -116,6 +123,7 @@ def _predict(
                     f"Prediction layer {config_signal.layer_pred.name} is empty."
                 ),
             )
+            return
         else:
             pred_data = config_signal.layer_pred.data
 
@@ -173,6 +181,8 @@ def _predict(
         #     time.sleep(0.2)
 
     except Exception as e:
+        traceback.print_exc()
+
         update_queue.put(PredictionUpdate(PredictionUpdateType.EXCEPTION, e))
         return
 

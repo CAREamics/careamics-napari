@@ -1,5 +1,6 @@
 """A thread worker function running CAREamics training."""
 
+import traceback
 from collections.abc import Generator
 from queue import Queue
 from threading import Thread
@@ -250,6 +251,8 @@ def _train(
         #     time.sleep(0.2)
 
     except Exception as e:
+        traceback.print_exc()
+
         training_queue.put(TrainUpdate(TrainUpdateType.EXCEPTION, e))
 
     training_queue.put(TrainUpdate(TrainUpdateType.STATE, TrainingState.DONE))

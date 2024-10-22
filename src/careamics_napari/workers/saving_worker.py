@@ -1,5 +1,6 @@
 """A thread worker function running CAREamics prediction."""
 
+import traceback
 from collections.abc import Generator
 
 from careamics import CAREamist
@@ -59,6 +60,8 @@ def save_worker(
             )
 
     except Exception as e:
+        traceback.print_exc()
+
         yield SavingUpdate(SavingUpdateType.EXCEPTION, e)
 
     yield SavingUpdate(SavingUpdateType.STATE, SavingState.DONE)

@@ -149,7 +149,7 @@ class PredictDataWidget(QTabWidget):
         layer : Image
             The selected layer.
         """
-        if self.config_signal.layer_pred is not None:
+        if self.config_signal is not None:
             self.config_signal.layer_pred = layer
 
     def _update_pred_folder(self: Self, folder: str) -> None:

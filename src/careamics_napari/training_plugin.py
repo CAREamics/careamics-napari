@@ -336,9 +336,9 @@ class TrainPlugin(QWidget):
 
             if _has_napari:
                 ntf.show_error(
-                    "An error occurred during prediction. Check the console for more "
-                    "information. Note: if you get an error due to the sizes of "
-                    "Tensors, try using tiling."
+                    f"An error occurred during prediction: \n {update.value} \n"
+                    f"Note: if you get an error due to the sizes of "
+                    f"Tensors, try using tiling."
                 )
 
         else:
@@ -365,11 +365,8 @@ class TrainPlugin(QWidget):
         elif update.type == SavingUpdateType.EXCEPTION:
             self.save_status.state = SavingState.CRASHED
 
-            # print exception without raising it
-            print(f"Error: {update.value}")
-
             if _has_napari:
-                ntf.show_error("An error occurred during saving.")
+                ntf.show_error(f"An error occurred during saving: \n {update.value}")
 
     def _set_data_from_algorithm(self, name: str) -> None:
         """Update the data selection widget based on the algorithm.

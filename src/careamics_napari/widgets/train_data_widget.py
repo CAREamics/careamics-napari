@@ -112,7 +112,6 @@ class TrainDataWidget(QTabWidget):
 
                 # tool tips
                 self.target_train.native.setToolTip("Select a training target layer.")
-
                 self.target_val.native.setToolTip("Select a validation target layer.")
 
                 # connection actions for targets
