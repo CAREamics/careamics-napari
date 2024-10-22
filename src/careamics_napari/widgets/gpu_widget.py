@@ -1,7 +1,8 @@
 """A label indicating whether GPU is available to torch."""
 
 from qtpy.QtWidgets import QLabel
-from torch.cuda import is_available
+
+from careamics_napari.utils.gpu_utils import is_gpu_available
 
 
 def create_gpu_label() -> QLabel:
@@ -12,7 +13,7 @@ def create_gpu_label() -> QLabel:
     QLabel
         GPU label widget.
     """
-    if is_available():
+    if is_gpu_available():
         text = "GPU"
         color = "ADC2A9"  # green
     else:
