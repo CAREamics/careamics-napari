@@ -4,6 +4,7 @@ from pathlib import Path
 from queue import Queue
 from typing import TYPE_CHECKING, Optional
 
+from careamics import CAREamist
 from careamics.config.support import SupportedAlgorithm
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QHBoxLayout, QStackedWidget, QVBoxLayout, QWidget
@@ -42,7 +43,6 @@ from careamics_napari.workers import predict_worker, save_worker, train_worker
 
 if TYPE_CHECKING:
     import napari
-    from careamics import CAREamist
 
 # at run time
 try:
