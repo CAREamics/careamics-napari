@@ -169,6 +169,7 @@ def _train(
             _push_exception(
                 training_queue, ValueError("Training layer has not been selected.")
             )
+            return
 
         elif config_signal.layer_train.data is None:
             _push_exception(
@@ -177,6 +178,7 @@ def _train(
                     f"Training layer {config_signal.layer_train.name} is empty."
                 ),
             )
+            return
         else:
             train_data = config_signal.layer_train.data
 
@@ -210,6 +212,7 @@ def _train(
                         f" is empty."
                     ),
                 )
+                return
             else:
                 train_data_target = config_signal.layer_train_target.data
 
