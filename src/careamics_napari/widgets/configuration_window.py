@@ -19,7 +19,14 @@ from typing_extensions import Self
 
 from careamics_napari.signals import TrainingSignal
 
-from .qt_widgets import create_int_spinbox
+try:
+    from .qt_widgets import create_double_spinbox, create_int_spinbox
+except ImportError:
+    # to run the __name__ == "main" block
+    from careamics_napari.widgets.qt_widgets import (
+        create_double_spinbox,
+        create_int_spinbox,
+    )
 
 # TODO missing:
 # structn2v
@@ -77,6 +84,30 @@ class AdvancedConfigurationWindow(QDialog):
         experiment_layout.addRow("Experiment name", self.experiment_name)
         experiment_widget.setLayout(experiment_layout)
         self.layout().addWidget(experiment_widget)
+
+        ##################
+        # validation
+        validation = QGroupBox("Validation")
+        validation_layout = QFormLayout()
+
+        self.validation_perc = create_double_spinbox(
+            0.01, 1, self.configuration_signal.val_percentage, 0.01, n_decimal=2
+        )
+        self.validation_perc.setToolTip(
+            "Percentage of the training data used for validation."
+        )
+
+        self.validation_split = create_int_spinbox(
+            1, 100, self.configuration_signal.val_minimum_split, 1
+        )
+        self.validation_perc.setToolTip(
+            "Minimum number of patches or images in the validation set."
+        )
+
+        validation_layout.addRow("Percentage", self.validation_perc)
+        validation_layout.addRow("Minimum split", self.validation_split)
+        validation.setLayout(validation_layout)
+        self.layout().addWidget(validation)
 
         ##################
         # augmentations group box, with x_flip, y_flip and rotations
@@ -253,6 +284,8 @@ class AdvancedConfigurationWindow(QDialog):
         # Update the parameters
         if self.configuration_signal is not None:
             self.configuration_signal.experiment_name = self.experiment_name.text()
+            self.configuration_signal.val_percentage = self.validation_perc.value()
+            self.configuration_signal.val_minimum_split = self.validation_split.value()
             self.configuration_signal.x_flip = self.x_flip.isChecked()
             self.configuration_signal.y_flip = self.y_flip.isChecked()
             self.configuration_signal.rotations = self.rotations.isChecked()
@@ -281,7 +314,7 @@ if __name__ == "__main__":
     myalgo = TrainingSignal(use_channels=False)  # type: ignore
 
     # Instantiate widget
-    widget = AdvancedConfigurationWindow(training_signal=myalgo)  # type: ignore
+    widget = AdvancedConfigurationWindow(None, training_signal=myalgo)  # type: ignore
 
     # Show the widget
     widget.show()

@@ -234,6 +234,8 @@ def _train(
             val_source=val_data,
             train_target=train_data_target,
             val_target=val_data_target,
+            val_minimum_split=config_signal.val_minimum_split,
+            val_percentage=config_signal.val_percentage,
         )
 
         # # TODO can we use this to monkey patch the training process?

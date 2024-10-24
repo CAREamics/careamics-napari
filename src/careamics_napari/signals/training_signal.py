@@ -142,3 +142,9 @@ class TrainingSignal:
 
     num_conv_filters: int = 32
     """Number of convolutional filters in the first layer."""
+
+    val_percentage: float = 0.1
+    """Percentage of the training data used for validation."""
+
+    val_minimum_split: int = 1
+    """Minimum number of patches or images in the validation set."""
