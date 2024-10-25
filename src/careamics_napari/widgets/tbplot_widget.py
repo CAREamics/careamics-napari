@@ -125,7 +125,7 @@ class TBPlotWidget(Container):
 
     def open_tb(self: Self) -> None:
         """Open TensorBoard in the browser."""
-        if self.tb is not None and self.train_signal is not None:
+        if self.tb is None and self.train_signal is not None:
             from tensorboard import program
 
             self.tb = program.TensorBoard()
