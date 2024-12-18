@@ -78,6 +78,7 @@ class ConfigurationWidget(QGroupBox):
         self.patch_Z_spin = PowerOfTwoSpinBox(8, 512, 8)
         self.patch_Z_spin.setToolTip("Dimension of the patches in Z.")
 
+        # TODO: is this necessary?
         if self.configuration_signal is not None:
             self.patch_Z_spin.setEnabled(self.configuration_signal.is_3d)
 
@@ -126,6 +127,7 @@ class ConfigurationWidget(QGroupBox):
             3D state.
         """
         self.patch_Z_spin.setVisible(state)
+        self.patch_Z_spin.setEnabled(state)
 
         if self.configuration_signal is not None:
             self.configuration_signal.is_3d = state
