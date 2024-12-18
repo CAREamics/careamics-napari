@@ -146,9 +146,11 @@ def _predict(
                 config_signal.tile_overlap_xy,
                 config_signal.tile_overlap_xy,
             )
+        batch_size = config_signal.batch_size
     else:
         tile_size = None
         tile_overlap = None
+        batch_size = 1
 
     # Predict with CAREamist
     try:
@@ -157,6 +159,7 @@ def _predict(
             data_type="tiff" if config_signal.load_from_disk else "array",
             tile_size=tile_size,
             tile_overlap=tile_overlap,
+            batch_size=batch_size,
         )
 
         update_queue.put(PredictionUpdate(PredictionUpdateType.SAMPLE, result))

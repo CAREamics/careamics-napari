@@ -55,3 +55,6 @@ class PredictionSignal:
 
     tile_overlap_z: int = 4  # TODO currently fixed
     """Overlap between the tiles along the Z dimension."""
+    
+    batch_size: int = 1
+    """Batch size."""
