@@ -39,10 +39,11 @@ def create_configuration(signal: TrainingSignal) -> Configuration:
         experiment_name = signal.experiment_name
 
     if signal.is_3d:
+        # order of patches is ZYX
         patches: list[int] = [
-            signal.patch_size_xy,
-            signal.patch_size_xy,
             signal.patch_size_z,
+            signal.patch_size_xy,
+            signal.patch_size_xy,
         ]
     else:
         patches = [signal.patch_size_xy, signal.patch_size_xy]
