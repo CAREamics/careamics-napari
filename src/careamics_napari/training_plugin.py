@@ -9,7 +9,6 @@ from careamics.config.support import SupportedAlgorithm
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QHBoxLayout, QStackedWidget, QVBoxLayout, QWidget
 from typing_extensions import Self
-import numpy as np
 
 from careamics_napari.signals import (
     PredictionSignal,
@@ -41,6 +40,9 @@ from careamics_napari.widgets import (
     create_gpu_label,
 )
 from careamics_napari.workers import predict_worker, save_worker, train_worker
+from careamics_napari.utils.axes_utils import reshape_prediction
+
+import numpy as np
 
 if TYPE_CHECKING:
     import napari
@@ -317,44 +319,6 @@ class TrainPlugin(QWidget):
         else:
             self.train_status.update(update)
 
-    def _reshape_prediction(self, prediction: np.ndarray) -> np.ndarray:
-        """Reshape the prediction to match the input axes.
-        The default axes of the model prediction is SC(Z)YX.
-
-        Parameters
-        ----------
-        prediction : np.ndarray
-            Prediction.
-
-        Returns
-        -------
-        np.ndarray
-            Reshaped prediction.
-        """
-        axes = self.train_config_signal.axes
-
-        # model outputs SC(Z)YX
-        pred_axes = "SCZYX" if self.pred_config_signal.is_3d else "SCYX"
-
-        # transpose the axes
-        # TODO: during prediction T and S are merged. Check how to handle this
-        input_axes = axes.replace("T", "S")
-        
-        if not "S" in input_axes:
-            # add S if missing
-            input_axes = "S" + input_axes
-
-        # TODO: check if all axes are present
-
-        indices = [input_axes.index(ax) for ax in pred_axes]
-        prediction = np.transpose(prediction, indices)
-
-        # remove S if not present in the input axes
-        if not "S" in axes:
-            prediction = prediction[0]
-
-        return prediction
-
     def _update_from_prediction(self, update: PredictionUpdate) -> None:
         """Update the signal from the prediction worker.
 
@@ -393,7 +357,7 @@ class TrainPlugin(QWidget):
                         samples = update.value
                     
                     # reshape the prediction to match the input axes
-                    samples = self._reshape_prediction(samples)
+                    samples = reshape_prediction(samples, self.train_config_signal.axes, self.pred_config_signal.is_3d)
 
                     self.viewer.add_image(samples, name="Prediction")
             else:
