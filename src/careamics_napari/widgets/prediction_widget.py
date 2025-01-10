@@ -27,6 +27,7 @@ from .predict_data_widget import PredictDataWidget
 from .qt_widgets import (
     PowerOfTwoSpinBox,
     create_progressbar,
+    create_int_spinbox
 )
 
 
@@ -103,9 +104,16 @@ class PredictionWidget(QGroupBox):
         self.tile_size_z.setToolTip("Tile size in the z dimension.")
         self.tile_size_z.setEnabled(False)
 
+        self.batch_size_spin = create_int_spinbox(1, 512, 1, 1)
+        self.batch_size_spin.setToolTip(
+            "Number of patches per batch (decrease if GPU memory is insufficient)"
+        )
+        self.batch_size_spin.setEnabled(False)
+
         tiling_form = QFormLayout()
         tiling_form.addRow("XY tile size", self.tile_size_xy)
         tiling_form.addRow("Z tile size", self.tile_size_z)
+        tiling_form.addRow("Batch size", self.batch_size_spin)
         tiling_widget = QWidget()
         tiling_widget.setLayout(tiling_form)
         self.layout().addWidget(tiling_widget)
@@ -139,6 +147,7 @@ class PredictionWidget(QGroupBox):
 
             self.tile_size_xy.valueChanged.connect(self._set_xy_tile_size)
             self.tile_size_z.valueChanged.connect(self._set_z_tile_size)
+            self.batch_size_spin.valueChanged.connect(self._set_batch_size)
 
             # listening to the signals
             self.train_signal.events.is_3d.connect(self._set_3d)
@@ -170,6 +179,17 @@ class PredictionWidget(QGroupBox):
         if self.pred_signal is not None:
             self.pred_signal.tile_size_z = size
 
+    def _set_batch_size(self: Self, size: int) -> None:
+        """Update the signal batch size.
+
+        Parameters
+        ----------
+        size : int
+            The new batch size.
+        """
+        if self.pred_signal is not None:
+            self.pred_signal.batch_size = size
+
     def _set_3d(self: Self, state: bool) -> None:
         """Enable the z tile size spinbox if the data is 3D.
 
@@ -191,6 +211,7 @@ class PredictionWidget(QGroupBox):
         """
         self.pred_signal.tiled = state
         self.tile_size_xy.setEnabled(state)
+        self.batch_size_spin.setEnabled(state)
 
         if self.train_signal.is_3d:
             self.tile_size_z.setEnabled(state)

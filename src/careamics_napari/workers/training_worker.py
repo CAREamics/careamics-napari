@@ -109,25 +109,31 @@ def _train(
         CAREamist instance.
     """
     # get configuration and queue
-    config = create_configuration(config_signal)
+    try:
+        # create_configuration can raise an exception
+        config = create_configuration(config_signal)
 
-    # Create CAREamist
-    if careamist is None:
-        careamist = CAREamist(
-            config, callbacks=[UpdaterCallBack(training_queue, predict_queue)]
-        )
-
-    else:
-        # only update the number of epochs
-        careamist.cfg.training_config.num_epochs = config.training_config.num_epochs
-
-        if config_signal.layer_val == "" and config_signal.path_val == "":
-            ntf.show_error(
-                "Continuing training is currently not supported without explicitely "
-                "passing validation. The reason is that otherwise, the data used for "
-                "validation will be different and there will be data leakage in the "
-                "training set."
+        # Create CAREamist
+        if careamist is None:
+            careamist = CAREamist(
+                config, callbacks=[UpdaterCallBack(training_queue, predict_queue)]
             )
+
+        else:
+            # only update the number of epochs
+            careamist.cfg.training_config.num_epochs = config.training_config.num_epochs
+
+            if config_signal.layer_val == "" and config_signal.path_val == "":
+                ntf.show_error(
+                    "Continuing training is currently not supported without explicitely "
+                    "passing validation. The reason is that otherwise, the data used for "
+                    "validation will be different and there will be data leakage in the "
+                    "training set."
+                )
+    except Exception as e:
+        traceback.print_exc()
+
+        training_queue.put(TrainUpdate(TrainUpdateType.EXCEPTION, e))
 
     # Register CAREamist
     training_queue.put(TrainUpdate(TrainUpdateType.CAREAMIST, careamist))

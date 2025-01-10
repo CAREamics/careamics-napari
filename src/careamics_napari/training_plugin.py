@@ -40,6 +40,9 @@ from careamics_napari.widgets import (
     create_gpu_label,
 )
 from careamics_napari.workers import predict_worker, save_worker, train_worker
+from careamics_napari.utils.axes_utils import reshape_prediction
+
+import numpy as np
 
 if TYPE_CHECKING:
     import napari
@@ -346,7 +349,17 @@ class TrainPlugin(QWidget):
                 # add image to napari
                 # TODO keep scaling?
                 if self.viewer is not None:
-                    self.viewer.add_image(update.value, name="Prediction")
+                    # value is eighter a numpy array or a list of numpy arrays with each sample/timepoint as an element
+                    if isinstance(update.value, list):
+                        # combine all samples
+                        samples = np.concatenate(update.value, axis=0)
+                    else:
+                        samples = update.value
+                    
+                    # reshape the prediction to match the input axes
+                    samples = reshape_prediction(samples, self.train_config_signal.axes, self.pred_config_signal.is_3d)
+
+                    self.viewer.add_image(samples, name="Prediction")
             else:
                 self.pred_status.update(update)
 

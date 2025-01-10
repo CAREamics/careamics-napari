@@ -2,6 +2,7 @@
 
 import warnings
 from itertools import permutations
+import numpy as np
 
 REF_AXES = "STCZYX"
 """References axes in CAREamics."""
@@ -80,3 +81,56 @@ def are_axes_valid(axes: str) -> bool:
 
     # prior: X and Y contiguous
     return ("XY" in _axes) or ("YX" in _axes)
+
+def reshape_prediction(prediction: np.ndarray, axes: str, is_3d: bool) -> np.ndarray:
+    """Reshape the prediction to match the input axes.
+    The default axes of the model prediction is SC(Z)YX.
+
+    Parameters
+    ----------
+    prediction : np.ndarray
+        Prediction.
+    axes : str
+        Axes of the input data.
+    is_3d : bool
+        Whether the data is 3D.
+
+    Returns
+    -------
+    np.ndarray
+        Reshaped prediction.
+    """
+        
+    # model outputs SC(Z)YX
+    pred_axes = "SCZYX" if is_3d else "SCYX"
+
+    # transpose the axes
+    # TODO: during prediction T and S are merged. Check how to handle this
+    input_axes = axes.replace("T", "S")
+    remove_c, remove_s = False, False
+    
+    if not "C" in input_axes:
+        # add C if missing
+        input_axes = "C" + input_axes
+        remove_c = True
+    
+    if not "S" in input_axes:
+        # add S if missing
+        input_axes = "S" + input_axes
+        remove_s = True
+
+    # TODO: check if all axes are present
+    assert all([ax in input_axes for ax in pred_axes])
+
+    indices = [pred_axes.index(ax) for ax in input_axes]
+    prediction = np.transpose(prediction, indices)
+
+    # remove S if not present in the input axes
+    if remove_c:
+        prediction = prediction[0]
+        
+    # remove C if not present in the input axes
+    if remove_s:
+        prediction = prediction[0]
+
+    return prediction
