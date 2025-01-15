@@ -105,6 +105,12 @@ class TrainDataWidget(QTabWidget):
             self.img_train.changed.connect(self._update_train_layer)
             self.img_val.changed.connect(self._update_val_layer)
 
+            # to cover the case when image was loaded before the plugin
+            if self.img_train.value is not None:
+                self._update_train_layer(self.img_train.value)
+            if self.img_val.value is not None:
+                self._update_val_layer(self.img_val.value)
+
             if self.use_target:
                 # get the target layers
                 self.target_train = layer_choice()
@@ -117,6 +123,12 @@ class TrainDataWidget(QTabWidget):
                 # connection actions for targets
                 self.target_train.changed.connect(self._update_train_target_layer)
                 self.target_val.changed.connect(self._update_val_target_layer)
+
+                # to cover the case when image was loaded before the plugin
+                if self.target_train.value is not None:
+                    self._update_train_target_layer(self.target_train.value)
+                if self.target_val.value is not None:
+                    self._update_val_target_layer(self.target_val.value)
 
                 widget_layers.layout().addRow("Train", self.img_train.native)
                 widget_layers.layout().addRow("Val", self.img_val.native)
