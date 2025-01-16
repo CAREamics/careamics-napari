@@ -91,7 +91,7 @@ class TrainProgressWidget(QGroupBox):
             Training state.
         """
         if state == TrainingState.IDLE or state == TrainingState.TRAINING:
-            self.plot.clear()
+            self.plot.clear_plot()
 
     def _update_max_epoch(self: Self, max_epoch: int):
         """Update the maximum number of epochs in the progress bar.
