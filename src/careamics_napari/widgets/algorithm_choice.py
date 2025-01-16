@@ -69,7 +69,7 @@ if __name__ == "__main__":
 
     myalgo = TrainingSignal()  # type: ignore
 
-    @myalgo.events.name.connect
+    @myalgo.events.algorithm.connect
     def print_algorithm(name: str):
         """Print the selected algorithm."""
         print(f"Selected algorithm: {name}")

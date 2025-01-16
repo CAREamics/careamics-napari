@@ -98,6 +98,9 @@ class PredictDataWidget(QTabWidget):
 
             # connection actions for images
             self.img_pred.changed.connect(self._update_pred_layer)
+            # to cover the case when image was loaded before the plugin
+            if self.img_pred.value is not None:
+                self._update_pred_layer(self.img_pred.value)
 
         else:
             # simply remove the tab
