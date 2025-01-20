@@ -46,7 +46,7 @@ class ConfigurationWidget(QGroupBox):
         self.config_window: Optional[AdvancedConfigurationWindow] = None
 
         self.setTitle("Training parameters")
-        # self.setMinimumWidth(100)
+        self.setMinimumWidth(200)
 
         # expert settings
         icon = QtGui.QIcon(ICON_GEAR)
@@ -83,6 +83,9 @@ class ConfigurationWidget(QGroupBox):
             self.patch_Z_spin.setEnabled(self.configuration_signal.is_3d)
 
         formLayout = QFormLayout()
+        formLayout.setContentsMargins(0, 0, 0, 0)
+        formLayout.setFormAlignment(Qt.AlignLeft | Qt.AlignTop)
+        formLayout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
         formLayout.addRow("Enable 3D", self.enable_3d)
         formLayout.addRow(self.axes_widget.label.text(), self.axes_widget.text_field)
         formLayout.addRow("N epochs", self.n_epochs_spin)

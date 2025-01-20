@@ -3,6 +3,7 @@
 from pathlib import Path
 from typing import Optional
 
+from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (
     QComboBox,
     QFileDialog,
@@ -71,11 +72,12 @@ class SavingWidget(QGroupBox):
         self.save_choice.setToolTip("Output format")
 
         self.save_button = QPushButton("Save model", self)
+        self.save_button.setMinimumWidth(120)
         self.save_button.setEnabled(False)
         self.save_choice.setToolTip("Save the model weights and configuration.")
 
-        save_widget.layout().addWidget(self.save_button)
         save_widget.layout().addWidget(self.save_choice)
+        save_widget.layout().addWidget(self.save_button, alignment=Qt.AlignLeft)
         self.layout().addWidget(save_widget)
 
         # actions

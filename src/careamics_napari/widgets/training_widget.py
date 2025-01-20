@@ -2,6 +2,7 @@
 
 from typing import Optional
 
+from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (
     QGroupBox,
     QHBoxLayout,
@@ -45,15 +46,17 @@ class TrainingWidget(QGroupBox):
         train_buttons.setLayout(QHBoxLayout())
 
         self.train_button = QPushButton("Train", self)
+        self.train_button.setMinimumWidth(120)
 
-        self.reset_model_button = QPushButton("", self)
+        self.reset_model_button = QPushButton("Reset", self)
+        self.reset_model_button.setMinimumWidth(120)
         self.reset_model_button.setEnabled(False)
         self.reset_model_button.setToolTip(
             "Reset the weights of the model (forget the training)"
         )
 
-        train_buttons.layout().addWidget(self.reset_model_button)
-        train_buttons.layout().addWidget(self.train_button)
+        train_buttons.layout().addWidget(self.train_button, alignment=Qt.AlignLeft)
+        train_buttons.layout().addWidget(self.reset_model_button, alignment=Qt.AlignLeft)
         self.layout().addWidget(train_buttons)
 
         # actions
@@ -94,7 +97,6 @@ class TrainingWidget(QGroupBox):
                 self.train_status.state = TrainingState.IDLE
                 self.train_button.setText("Train")
                 self.reset_model_button.setEnabled(False)
-                self.reset_model_button.setText("")
 
     def _update_button(self, new_state: TrainingState) -> None:
         """Update the button text based on the training state.

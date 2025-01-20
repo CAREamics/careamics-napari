@@ -2,6 +2,7 @@
 
 from typing import TYPE_CHECKING, Optional
 
+from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (
     QFormLayout,
     QTabWidget,
@@ -92,8 +93,10 @@ class TrainDataWidget(QTabWidget):
             Layer tab widget.
         """
         if _has_napari and napari.current_viewer() is not None:
-            widget_layers = QWidget()
-            widget_layers.setLayout(QFormLayout())
+            form = QFormLayout()
+            form.setFormAlignment(Qt.AlignLeft | Qt.AlignTop)
+            form.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
+            form.setContentsMargins(12, 12, 0, 0)
 
             self.img_train = layer_choice()
             self.img_train.native.setToolTip("Select a training layer.")
@@ -130,16 +133,17 @@ class TrainDataWidget(QTabWidget):
                 if self.target_val.value is not None:
                     self._update_val_target_layer(self.target_val.value)
 
-                widget_layers.layout().addRow("Train", self.img_train.native)
-                widget_layers.layout().addRow("Val", self.img_val.native)
-                widget_layers.layout().addRow("Train target", self.target_train.native)
-                widget_layers.layout().addRow("Val target", self.target_val.native)
+                form.addRow("Train", self.img_train.native)
+                form.addRow("Val", self.img_val.native)
+                form.addRow("Train target", self.target_train.native)
+                form.addRow("Val target", self.target_val.native)
 
             else:
-                widget_layers.layout().addRow("Train", self.img_train.native)
-                widget_layers.layout().addRow("Val", self.img_val.native)
+                form.addRow("Train", self.img_train.native)
+                form.addRow("Val", self.img_val.native)
 
-            layer_tab.layout().addWidget(widget_layers)
+            # layer_tab.layout().addWidget(widget_layers)
+            layer_tab.layout().addLayout(form)
 
         else:
             # simply remove the tab
@@ -156,7 +160,8 @@ class TrainDataWidget(QTabWidget):
         # disk tab
         buttons = QWidget()
         form = QFormLayout()
-        # form.setContentsMargins(4, 0, 4, 0)
+        form.setFormAlignment(Qt.AlignLeft | Qt.AlignTop)
+        form.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
         # form.setSpacing(0)
 
         self.train_images_folder = FolderWidget("Choose")
