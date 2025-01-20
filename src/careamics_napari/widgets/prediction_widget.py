@@ -2,6 +2,7 @@
 
 from typing import Optional
 
+from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (
     QCheckBox,
     QFormLayout,
@@ -81,7 +82,6 @@ class PredictionWidget(QGroupBox):
 
         self.setTitle("Prediction")
         self.setLayout(QVBoxLayout())
-        self.layout().setContentsMargins(20, 20, 20, 0)
 
         # data selection
         predict_data_widget = PredictDataWidget(self.pred_signal)
@@ -111,6 +111,8 @@ class PredictionWidget(QGroupBox):
         self.batch_size_spin.setEnabled(False)
 
         tiling_form = QFormLayout()
+        tiling_form.setFormAlignment(Qt.AlignLeft | Qt.AlignTop)
+        tiling_form.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
         tiling_form.addRow("XY tile size", self.tile_size_xy)
         tiling_form.addRow("Z tile size", self.tile_size_z)
         tiling_form.addRow("Batch size", self.batch_size_spin)
@@ -128,11 +130,11 @@ class PredictionWidget(QGroupBox):
         predictions = QWidget()
         predictions.setLayout(QHBoxLayout())
         self.predict_button = QPushButton("Predict", self)
+        self.predict_button.setMinimumWidth(120)
         self.predict_button.setEnabled(False)
         self.predict_button.setToolTip("Run the trained model on the images")
 
-        predictions.layout().addWidget(QLabel(""))
-        predictions.layout().addWidget(self.predict_button)
+        predictions.layout().addWidget(self.predict_button, alignment=Qt.AlignLeft)
 
         # add to the group
         self.layout().addWidget(self.pb_prediction)

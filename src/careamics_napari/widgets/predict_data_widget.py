@@ -2,6 +2,7 @@
 
 from typing import TYPE_CHECKING, Optional
 
+from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (
     QFormLayout,
     QTabWidget,
@@ -88,11 +89,15 @@ class PredictDataWidget(QTabWidget):
             The layer tab.
         """
         if _has_napari and napari.current_viewer() is not None:
+            form = QFormLayout()
+            form.setFormAlignment(Qt.AlignLeft | Qt.AlignTop)
+            form.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
+            form.setContentsMargins(12, 12, 0, 0)
             widget_layers = QWidget()
-            widget_layers.setLayout(QFormLayout())
+            widget_layers.setLayout(form)
 
             self.img_pred = layer_choice()
-            widget_layers.layout().addRow("Predict", self.img_pred.native)
+            form.addRow("Predict", self.img_pred.native)
 
             layer_tab.layout().addWidget(widget_layers)
 
@@ -117,8 +122,8 @@ class PredictDataWidget(QTabWidget):
         # disk tab
         buttons = QWidget()
         form = QFormLayout()
-        # form.setContentsMargins(4, 0, 4, 0)
-        # form.setSpacing(0)
+        form.setFormAlignment(Qt.AlignLeft | Qt.AlignTop)
+        form.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
 
         self.pred_images_folder = FolderWidget("Choose")
         form.addRow("Predict", self.pred_images_folder)

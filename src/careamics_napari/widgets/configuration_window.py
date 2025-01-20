@@ -74,6 +74,8 @@ class AdvancedConfigurationWindow(QDialog):
         # experiment name text box
         experiment_widget = QWidget()
         experiment_layout = QFormLayout()
+        experiment_layout.setFormAlignment(Qt.AlignLeft | Qt.AlignTop)
+        experiment_layout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
 
         self.experiment_name = QLineEdit()
         self.experiment_name.setToolTip(
@@ -89,6 +91,8 @@ class AdvancedConfigurationWindow(QDialog):
         # validation
         validation = QGroupBox("Validation")
         validation_layout = QFormLayout()
+        validation_layout.setFormAlignment(Qt.AlignLeft | Qt.AlignTop)
+        validation_layout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
 
         self.validation_perc = create_double_spinbox(
             0.01, 1, self.configuration_signal.val_percentage, 0.01, n_decimal=2
@@ -113,6 +117,8 @@ class AdvancedConfigurationWindow(QDialog):
         # augmentations group box, with x_flip, y_flip and rotations
         augmentations = QGroupBox("Augmentations")
         augmentations_layout = QFormLayout()
+        augmentations_layout.setFormAlignment(Qt.AlignLeft | Qt.AlignTop)
+        augmentations_layout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
 
         self.x_flip = QCheckBox("X Flip")
         self.x_flip.setToolTip(
@@ -146,6 +152,8 @@ class AdvancedConfigurationWindow(QDialog):
 
         ind_channels_widget = QWidget()
         ind_channels_layout = QFormLayout()
+        ind_channels_layout.setFormAlignment(Qt.AlignLeft | Qt.AlignTop)
+        ind_channels_layout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
 
         self.independent_channels = QCheckBox("Independent")
         self.independent_channels.setToolTip(
@@ -161,6 +169,8 @@ class AdvancedConfigurationWindow(QDialog):
         # n2v
         n2v_channels_widget = QWidget()
         n2v_channels_widget_layout = QFormLayout()
+        n2v_channels_widget_layout.setFormAlignment(Qt.AlignLeft | Qt.AlignTop)
+        n2v_channels_widget_layout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
 
         self.n_channels = create_int_spinbox(
             1, 10, self.configuration_signal.n_channels_n2v, 1
@@ -173,6 +183,8 @@ class AdvancedConfigurationWindow(QDialog):
         # care/n2n
         care_channels_widget = QWidget()
         care_channels_widget_layout = QFormLayout()
+        care_channels_widget_layout.setFormAlignment(Qt.AlignLeft | Qt.AlignTop)
+        care_channels_widget_layout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
 
         self.n_channels_in = create_int_spinbox(
             1, 10, self.configuration_signal.n_channels_in_care, 1
@@ -199,6 +211,8 @@ class AdvancedConfigurationWindow(QDialog):
         # n2v2
         self.n2v2_widget = QGroupBox("N2V2")
         n2v2_layout = QFormLayout()
+        n2v2_layout.setFormAlignment(Qt.AlignLeft | Qt.AlignTop)
+        n2v2_layout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
 
         self.use_n2v2 = QCheckBox("Use N2V2")
         self.use_n2v2.setToolTip("Check to use N2V2 for training.")
@@ -212,6 +226,8 @@ class AdvancedConfigurationWindow(QDialog):
         # model params
         model_params = QGroupBox("UNet parameters")
         model_params_layout = QFormLayout()
+        model_params_layout.setFormAlignment(Qt.AlignLeft | Qt.AlignTop)
+        model_params_layout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
 
         self.model_depth = create_int_spinbox(2, 5, self.configuration_signal.depth, 1)
         self.model_depth.setToolTip("Depth of the U-Net model.")
@@ -232,7 +248,7 @@ class AdvancedConfigurationWindow(QDialog):
         button_widget = QWidget()
         button_widget.setLayout(QVBoxLayout())
         self.save_button = QPushButton("Save")
-        self.save_button.setMaximumWidth(80)
+        self.save_button.setMinimumWidth(120)
         button_widget.layout().addWidget(self.save_button)
         button_widget.layout().setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout().addWidget(button_widget)
