@@ -4,7 +4,7 @@ import traceback
 from collections.abc import Generator
 
 from careamics import CAREamist
-from napari.qt.threading import thread_worker
+from superqt.utils import thread_worker
 
 from careamics_napari.signals import (
     ExportType,

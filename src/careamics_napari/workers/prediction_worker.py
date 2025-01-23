@@ -7,7 +7,7 @@ from threading import Thread
 from typing import Optional, Union
 
 from careamics import CAREamist
-from napari.qt.threading import thread_worker
+from superqt.utils import thread_worker
 
 from careamics_napari.signals import (
     PredictionSignal,

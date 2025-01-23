@@ -9,7 +9,7 @@ from typing import Optional
 import napari.utils.notifications as ntf
 from careamics import CAREamist
 from careamics.config.support import SupportedAlgorithm
-from napari.qt.threading import thread_worker
+from superqt.utils import thread_worker
 
 from careamics_napari.careamics_utils import UpdaterCallBack
 from careamics_napari.careamics_utils.configuration import create_configuration
