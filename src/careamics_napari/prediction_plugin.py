@@ -6,46 +6,32 @@ from typing import TYPE_CHECKING, Optional
 
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (
-    QHBoxLayout, QStackedWidget, QVBoxLayout, QWidget,
-    QPushButton, QLineEdit, QFileDialog
+    QHBoxLayout, QVBoxLayout, QWidget,
+    QLabel, QPushButton, QLineEdit, QFileDialog
 )
 from typing_extensions import Self
 
+from careamics import CAREamist
 from careamics_napari.signals import (
     PredictionSignal,
     PredictionState,
     PredictionStatus,
     PredictionUpdate,
     PredictionUpdateType,
-    # SavingSignal,
-    # SavingState,
-    # SavingStatus,
-    # SavingUpdate,
-    # SavingUpdateType,
     # TrainingSignal,
     TrainingState,
-    # TrainingStatus,
+    TrainingStatus,
     # TrainUpdate,
     # TrainUpdateType,
 )
 from careamics_napari.widgets import (
-    # AlgorithmSelectionWidget,
     CAREamicsBanner,
-    # ConfigurationWidget,
     PredictionWidget,
-    # SavingWidget,
     ScrollWidgetWrapper,
-    # TrainDataWidget,
-    # TrainingWidget,
-    # TrainProgressWidget,
     create_gpu_label,
 )
-# from careamics.config.support import SupportedAlgorithm
 from careamics_napari.workers import predict_worker
 from careamics_napari.utils.axes_utils import reshape_prediction
-from careamics import CAREamist
-# from careamics.config import Configuration
-from careamics.model_io import load_pretrained
 
 import numpy as np
 
@@ -108,6 +94,7 @@ class PredictionPlugin(QWidget):
         self.careamist: Optional[CAREamist] = None
 
         # create statuses, used to keep track of the threads statuses
+        self.train_status = TrainingStatus()  # type: ignore
         self.pred_status = PredictionStatus()  # type: ignore
 
         # create signals, used to hold the various parameters modified by the UI
@@ -131,12 +118,17 @@ class PredictionPlugin(QWidget):
                 short_desc=("CAREamics UI for training denoising models."),
             )
         )
+        # algorithm
+        self.algo_label = QLabel("**Algorithm**: *model is not loaded*")
+        self.algo_label.setTextFormat(Qt.MarkdownText)
+        self.algo_label.setEnabled(False)
         # gpu button
         gpu_button = create_gpu_label()
-        gpu_button.setAlignment(Qt.AlignmentFlag.AlignRight)
-        gpu_button.setContentsMargins(0, 5, 0, 0)  # top margin
-        gpu_button.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        self.layout().addWidget(gpu_button)
+        hbox = QHBoxLayout()
+        hbox.setContentsMargins(0, 0, 0, 5)  # bottom margin
+        hbox.addWidget(self.algo_label)
+        hbox.addWidget(gpu_button, alignment=Qt.AlignmentFlag.AlignRight)
+        self.layout().addLayout(hbox)
 
         # load model ui
         load_button = QPushButton("Load Model...", self)
@@ -151,7 +143,7 @@ class PredictionPlugin(QWidget):
 
         # add prediction
         self.prediction_widget = PredictionWidget(
-            train_status=None,
+            train_status=self.train_status,
             pred_status=self.pred_status,
             train_signal=None,
             pred_signal=self.pred_config_signal,
@@ -159,7 +151,7 @@ class PredictionPlugin(QWidget):
         self.prediction_widget.setEnabled(False)
         self.layout().addWidget(self.prediction_widget)
 
-        # changes from the training, prediction or saving state
+        # changes from the prediction state
         self.pred_status.events.state.connect(self._prediction_state_changed)
 
     def _select_model_checkpoint(self) -> None:
@@ -189,9 +181,17 @@ class PredictionPlugin(QWidget):
             CAREamist instance or None if the model could not be loaded.
         """
         try:
-            # model, config = load_pretrained(model_path)
+            # carefully load the model among the mist: careamist!
             careamist = CAREamist(model_path)
+            # training is already done!
+            self.train_status.state = TrainingState.DONE
+            self.algo_label.setText(
+                f"**Algorithm**: {careamist.cfg.get_algorithm_friendly_name()}"
+            )
+            self.algo_label.setEnabled(True)
+
             return careamist
+
         except Exception as e:
             print(f"Error loading model: {e}")
             return None
@@ -257,40 +257,13 @@ class PredictionPlugin(QWidget):
 
                     # reshape the prediction to match the input axes
                     samples = reshape_prediction(
-                        samples, self.train_config_signal.axes,
+                        samples, self.careamist.cfg.data_config.axes,
                         self.pred_config_signal.is_3d
                     )
 
                     self.viewer.add_image(samples, name="Prediction")
             else:
                 self.pred_status.update(update)
-
-    def _predict_button_clicked(self: Self) -> None:
-        """Run the prediction on the images."""
-        if self.pred_status is not None:
-            if (
-                self.pred_status.state == PredictionState.IDLE
-                or self.train_status.state == TrainingState.DONE
-                or self.pred_status.state == PredictionState.CRASHED
-            ):
-                self.pred_status.state = PredictionState.PREDICTING
-                self.predict_button.setEnabled(False)
-
-    def _set_data_from_algorithm(self, name: str) -> None:
-        """Update the data selection widget based on the algorithm.
-
-        Parameters
-        ----------
-        name : str
-            Algorithm name.
-        """
-        if (
-            name == SupportedAlgorithm.CARE.value
-            or name == SupportedAlgorithm.N2N.value
-        ):
-            self.data_stck.setCurrentIndex(1)
-        else:
-            self.data_stck.setCurrentIndex(0)
 
     def closeEvent(self, event) -> None:
         """Close the plugin.
