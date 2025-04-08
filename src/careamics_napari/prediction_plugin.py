@@ -92,6 +92,7 @@ class PredictionPlugin(QWidget):
         self.careamist: Optional[CAREamist] = None
 
         # create statuses, used to keep track of the threads statuses
+        # TODO: prediction widget should not be dependent on the training status
         self.train_status = TrainingStatus()  # type: ignore
         self.pred_status = PredictionStatus()  # type: ignore
 
@@ -99,6 +100,8 @@ class PredictionPlugin(QWidget):
         self.pred_config_signal = PredictionSignal()
 
         # create queues, used to communicate between the threads and the UI
+        # TODO: we shouldn't need to have a training queue here
+        # right now, UpdateCallBack init requires it.
         self._training_queue: Queue = Queue(10)
         self._prediction_queue: Queue = Queue(10)
 
