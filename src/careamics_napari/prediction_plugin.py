@@ -30,6 +30,7 @@ from careamics_napari.widgets import (
     ScrollWidgetWrapper,
     create_gpu_label,
 )
+from careamics_napari.careamics_utils import UpdaterCallBack
 from careamics_napari.workers import predict_worker
 from careamics_napari.utils.axes_utils import reshape_prediction
 
@@ -101,6 +102,7 @@ class PredictionPlugin(QWidget):
         self.pred_config_signal = PredictionSignal()
 
         # create queues, used to communicate between the threads and the UI
+        self._training_queue: Queue = Queue(10)
         self._prediction_queue: Queue = Queue(10)
 
         self._init_ui()
@@ -182,7 +184,10 @@ class PredictionPlugin(QWidget):
         """
         try:
             # carefully load the model among the mist: careamist!
-            careamist = CAREamist(model_path)
+            careamist = CAREamist(
+                model_path,
+                callbacks=[UpdaterCallBack(self._training_queue, self._prediction_queue)]
+            )
             # training is already done!
             self.train_status.state = TrainingState.DONE
             self.algo_label.setText(
