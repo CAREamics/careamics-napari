@@ -21,7 +21,7 @@ dependencies = [
     'qtpy',
     'psygnal',
     'pyqtgraph',
-    'napari',
+    'napari[all]',
     'careamics[tensorboard]<=0.0.11',
     'careamics-portfolio',
 ]
@@ -32,7 +32,7 @@ dev = [
     "pytest",     # https://docs.pytest.org/en/latest/contents.html
     "pytest-cov", # https://pytest-cov.readthedocs.io/en/latest/
     "pytest-qt",  # https://pytest-qt.readthedocs.io/en/latest/
-    "pyqt5",
+    "pyqt",
 ]
 
 [project.entry-points."napari.manifest"]
