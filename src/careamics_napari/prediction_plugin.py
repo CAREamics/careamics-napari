@@ -18,11 +18,8 @@ from careamics_napari.signals import (
     PredictionStatus,
     PredictionUpdate,
     PredictionUpdateType,
-    # TrainingSignal,
     TrainingState,
     TrainingStatus,
-    # TrainUpdate,
-    # TrainUpdateType,
 )
 from careamics_napari.widgets import (
     CAREamicsBanner,
