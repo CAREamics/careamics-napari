@@ -24,6 +24,7 @@ dependencies = [
     'napari[all]',
     'careamics[tensorboard]',
     'careamics-portfolio',
+    'numcodecs<0.16'
 ]
 
 [project.optional-dependencies]
