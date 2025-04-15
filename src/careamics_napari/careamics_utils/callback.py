@@ -43,6 +43,7 @@ class UpdaterCallBack(Callback):
         prediction_queue : Queue
             Prediction queue used to pass updates between threads.
         """
+        # TODO: the training queue should be optional in case of prediction only
         self.training_queue = training_queue
         self.prediction_queue = prediction_queue
 

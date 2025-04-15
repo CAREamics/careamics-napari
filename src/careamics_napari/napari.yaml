@@ -5,6 +5,9 @@ contributions:
     - id: careamics-napari.make_train_widget
       python_name: careamics_napari.training_plugin:TrainPluginWrapper
       title: Train CAREamics
+    - id: careamics-napari.make_prediction_widget
+      python_name: careamics_napari.prediction_plugin:PredictionPluginWrapper
+      title: Predict CAREamics
     - id: careamics-napari.data_SEM_N2V
       python_name: careamics_napari.sample_data:n2v_sem_data
       title: Noise2Void SEM
@@ -17,6 +20,8 @@ contributions:
   widgets:
     - command: careamics-napari.make_train_widget
       display_name: Train CAREamics
+    - command: careamics-napari.make_prediction_widget
+      display_name: Predict CAREamics
   sample_data:
     - command: careamics-napari.data_SEM_N2V
       display_name: Download data for N2V (SEM)
