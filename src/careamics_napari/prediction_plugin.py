@@ -159,7 +159,7 @@ class PredictionPlugin(QWidget):
     def _select_model_checkpoint(self) -> None:
         """Load a select CAREamics model."""
         selected_file, _filter = QFileDialog.getOpenFileName(
-            self, "CAREamics", ".", "CAREamics Model(*.ckpt, *.zip)"
+            self, "CAREamics", ".", "CAREamics Model(*.ckpt *.zip)"
         )
         if selected_file is not None and len(selected_file) > 0:
             self.careamist = self._load_model(selected_file)
