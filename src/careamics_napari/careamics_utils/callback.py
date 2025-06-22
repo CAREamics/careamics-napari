@@ -158,11 +158,14 @@ class UpdaterCallBack(Callback):
         pl_module : LightningModule
             PyTorch Lightning module.
         """
+        # lightning returns a number of batches per dataloader
+        # careamics currently only supports one
+        n_batches = int(trainer.num_predict_batches[0])
+
         self.prediction_queue.put(
             PredictionUpdate(
                 PredictionUpdateType.MAX_SAMPLES,
-                # lightning returns a number of batches per dataloader
-                trainer.num_predict_batches[0],
+                n_batches,
             )
         )
 
