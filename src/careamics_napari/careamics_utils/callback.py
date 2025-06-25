@@ -159,8 +159,12 @@ class UpdaterCallBack(Callback):
             PyTorch Lightning module.
         """
         # lightning returns a number of batches per dataloader
-        # careamics currently only supports one
-        n_batches = int(trainer.num_predict_batches[0])
+        # if data is loading from disk, the IterableDataset length is not defined.
+        n_batches = trainer.num_predict_batches[0]
+        if n_batches == np.inf:
+            n_batches = "?"
+        else:
+            n_batches = int(n_batches)
 
         self.prediction_queue.put(
             PredictionUpdate(
