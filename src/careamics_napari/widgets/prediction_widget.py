@@ -8,7 +8,6 @@ from qtpy.QtWidgets import (
     QFormLayout,
     QGroupBox,
     QHBoxLayout,
-    QLabel,
     QPushButton,
     QVBoxLayout,
     QWidget,
@@ -25,11 +24,7 @@ from careamics_napari.signals import (
 )
 
 from .predict_data_widget import PredictDataWidget
-from .qt_widgets import (
-    PowerOfTwoSpinBox,
-    create_progressbar,
-    create_int_spinbox
-)
+from .qt_widgets import PowerOfTwoSpinBox, create_int_spinbox, create_progressbar
 
 
 class PredictionWidget(QGroupBox):

@@ -158,11 +158,18 @@ class UpdaterCallBack(Callback):
         pl_module : LightningModule
             PyTorch Lightning module.
         """
+        # lightning returns a number of batches per dataloader
+        # if data is loading from disk, the IterableDataset length is not defined.
+        n_batches = trainer.num_predict_batches[0]
+        if n_batches == np.inf:
+            n_batches = "?"
+        else:
+            n_batches = int(n_batches)
+
         self.prediction_queue.put(
             PredictionUpdate(
                 PredictionUpdateType.MAX_SAMPLES,
-                # lightning returns a number of batches per dataloader
-                trainer.num_predict_batches[0],
+                n_batches,
             )
         )
 
