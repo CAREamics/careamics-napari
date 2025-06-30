@@ -3,6 +3,7 @@
 from queue import Queue
 from typing import Any
 
+import numpy as np
 from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.callbacks import Callback
 from typing_extensions import Self
